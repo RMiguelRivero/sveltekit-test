@@ -6,7 +6,6 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	console.log('page.url:', page.url);
 
 	function buildQueryString(page: number, tags: string[], sort: string): string {
 		const params = new SvelteURLSearchParams();
@@ -45,6 +44,10 @@
 		const url = `${page.url.pathname}${qs}`;
 		console.log(`Navigating to: ${url}`);
 		goto(resolve(url));
+	}
+
+	function buildPostUrl(slug: string): string {
+		return `${page.url.pathname}/${slug}`;
 	}
 </script>
 
@@ -86,6 +89,9 @@
 					</div>
 					<p class="mb-4 leading-relaxed text-gray-700">
 						{post.translations[data.locale].excerpt}
+						<a href={resolve(buildPostUrl(post.slug))} class="text-blue-600 hover:underline">
+							Read more
+						</a>
 					</p>
 					<div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:text-sm">
 						<span class="text-gray-600">{post.readingTimeMinutes} min read</span>
