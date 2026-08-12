@@ -11,7 +11,6 @@ export const load: PageServerLoad = async ({ url, params }) => {
 	const searchParams = url.searchParams as URLSearchParams;
 	const page = parseInt(searchParams.get('page') || '1', 10);
 	const tagsParam = searchParams.get('tags');
-	console.log('tagsParam:', tagsParam);
 	const tags = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
 	const sort = (searchParams.get('sort') as 'date-desc' | 'date-asc') || 'date-desc';
 

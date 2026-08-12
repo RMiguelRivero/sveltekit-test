@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import type { PageData } from './$types';
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+	console.log('page.url:', page.url);
 
 	function buildQueryString(page: number, tags: string[], sort: string): string {
 		const params = new SvelteURLSearchParams();
@@ -12,27 +14,25 @@
 			params.set('page', String(page));
 		}
 		if (tags.length > 0) {
-			const newTags = tags.join(',');
-			console.info(`Building query string with newTags: ${newTags}`);
-			params.set('tags', newTags);
+			params.set('tags', tags.join(','));
 		}
 		if (sort !== 'date-desc') {
 			params.set('sort', sort);
 		}
-		return params.toString() ? `?${params.toString()}` : '';
+		return `?${params.toString()}`;
 	}
 
 	const previousPageUrl = $derived(
-		`/${data.locale}/blogs${buildQueryString(data.currentPage - 1, data.currentTags, data.currentSort)}`,
+		`${page.url.pathname}${buildQueryString(data.currentPage - 1, data.currentTags, data.currentSort)}`,
 	);
 	const nextPageUrl = $derived(
-		`/${data.locale}/blogs${buildQueryString(data.currentPage + 1, data.currentTags, data.currentSort)}`,
+		`${page.url.pathname}${buildQueryString(data.currentPage + 1, data.currentTags, data.currentSort)}`,
 	);
 
 	function sortHandler(event: Event) {
 		const target = event.target as HTMLSelectElement;
 		const qs = buildQueryString(1, data.currentTags, target.value);
-		const url = `/${data.locale}/blogs${qs}`;
+		const url = `${page.url.pathname}${qs}`;
 		console.log(`Navigating to: ${url}`);
 		goto(resolve(url));
 	}
@@ -42,7 +42,7 @@
 			? data.currentTags.filter((t) => t !== tag)
 			: [...data.currentTags, tag];
 		const qs = buildQueryString(1, newTags, data.currentSort);
-		const url = `/${data.locale}/blogs${qs}`;
+		const url = `${page.url.pathname}${qs}`;
 		console.log(`Navigating to: ${url}`);
 		goto(resolve(url));
 	}
