@@ -5,41 +5,45 @@ export const localeSchema = z.enum(['en', 'de']);
 export const authorSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	avatarColor: z.string().regex(/^#[0-9a-fA-F]{6}$/)
+	avatarColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
 });
 
 export const postTranslationSchema = z.object({
 	title: z.string(),
 	excerpt: z.string(),
-	body: z.string()
+	body: z.string(),
 });
 
-export const postSchema = z.object({
-	id: z.string(),
-	slug: z.string(),
-	translations: z.record(localeSchema, postTranslationSchema),
-	tags: z.array(z.string()),
-	author: authorSchema,
-	publishedAt: z.iso.datetime(),
-	readingTimeMinutes: z.number().int().positive(),
-	coverColor: z.string().regex(/^#[0-9a-fA-F]{6}$/)
-});
+export const postSchema = z
+	.object({
+		id: z.string(),
+		slug: z.string(),
+		translations: z.record(localeSchema, postTranslationSchema),
+		tags: z.array(z.string()),
+		author: authorSchema,
+		publishedAt: z.iso.datetime(),
+		readingTimeMinutes: z.number().int().positive(),
+		coverColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+	})
+	.meta({ id: 'postSchema' });
 
 export const userRoleSchema = z.enum(['admin', 'editor', 'viewer']);
 
-export const userSchema = z.object({
-	id: z.string(),
-	email: z.email(),
-	password: z.string(),
-	name: z.string(),
-	role: userRoleSchema
-});
+export const userSchema = z
+	.object({
+		id: z.string(),
+		email: z.email(),
+		password: z.string(),
+		name: z.string(),
+		role: userRoleSchema,
+	})
+	.meta({ id: 'userSchema' });
 
-export const userListSchema = z.array(userSchema);
+export const userListSchema = z.array(userSchema).meta({ id: 'userListSchema' });
 
 export const itemOwnerSchema = z.object({
 	id: z.string(),
-	name: z.string()
+	name: z.string(),
 });
 
 export const itemSchema = z.object({
@@ -56,22 +60,22 @@ export const itemSchema = z.object({
 	startDate: z.iso.date(),
 	endDate: z.iso.date(),
 	updatedAt: z.iso.datetime(),
-	tags: z.array(z.string())
+	tags: z.array(z.string()),
 });
 
-export const itemListSchema = z.array(itemSchema);
+export const itemListSchema = z.array(itemSchema).meta({ id: 'itemListSchema' });
 
-export const postListSchema = z.array(postSchema);
+export const postListSchema = z.array(postSchema).meta({ id: 'postListSchema' });
 
 export const loginPayloadSchema = z.object({
 	email: z.email(),
-	password: z.string().min(1)
+	password: z.string().min(1),
 });
 
 export const loginResultSchema = z.object({
 	ok: z.boolean(),
 	user: userSchema.optional(),
-	message: z.string().optional()
+	message: z.string().optional(),
 });
 
 export type Locale = z.infer<typeof localeSchema>;
