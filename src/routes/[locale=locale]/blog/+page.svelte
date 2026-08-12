@@ -18,7 +18,8 @@
 		if (sort !== 'date-desc') {
 			params.set('sort', sort);
 		}
-		return `?${params.toString()}`;
+		const stringParams = params.toString();
+		return stringParams ? `?${stringParams}` : '';
 	}
 
 	const previousPageUrl = $derived(
