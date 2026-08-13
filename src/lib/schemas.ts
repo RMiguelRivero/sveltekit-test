@@ -76,6 +76,13 @@ export const itemSchema = z.object({
 
 export const itemListSchema = z.array(itemSchema).meta({ id: 'itemListSchema' });
 
+export const itemUpdateSchema = z
+	.object({
+		id: z.string().min(1),
+		status: itemStatusSchema,
+	})
+	.meta({ id: 'itemUpdateSchema' });
+
 export const postListSchema = z.array(postSchema).meta({ id: 'postListSchema' });
 
 export const loginPayloadSchema = z.object({
@@ -95,5 +102,6 @@ export type User = z.infer<typeof userSchema>;
 export type Item = z.infer<typeof itemSchema>;
 export type ItemStatus = z.infer<typeof itemStatusSchema>;
 export type ItemChannel = z.infer<typeof itemChannelSchema>;
+export type ItemUpdate = z.infer<typeof itemUpdateSchema>;
 export type LoginPayload = z.infer<typeof loginPayloadSchema>;
 export type LoginResult = z.infer<typeof loginResultSchema>;

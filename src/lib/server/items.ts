@@ -1,4 +1,5 @@
 import type { Item, ItemChannel, ItemStatus } from '$lib/schemas';
+import { getValidatedItems } from './api';
 
 export const ITEMS_PER_PAGE = 25;
 
@@ -82,4 +83,47 @@ export function queryItems(allItems: Item[], query: ItemsQuery): PaginatedItems 
 		pageSize,
 		totalPages,
 	};
+}
+
+// Mock/in-memory persistence layer standing in for a real database: `static/mocks/items.json`
+// is a static file, so a mutation has nowhere durable to land without one. Seeded once per
+// server process from the validated fixture; every read (the items page `load`) and write
+// (`updateItemStatus`) goes through this same array so edits are observable across requests
+// within the process. Two honest limitations worth stating on the follow-up call: it resets
+// on server restart, and on serverless platforms (e.g. Vercel) each function instance gets
+// its own copy, so a write from one invocation isn't guaranteed visible from another — a real
+// deployment needs an actual database here.
+let itemsStore: Item[] | null = null;
+
+export function getItemsStore(): Item[] {
+	if (itemsStore === null) {
+		itemsStore = getValidatedItems();
+	}
+	return itemsStore;
+}
+
+// Reserved so the E2E suite (step 17) can deterministically exercise the optimistic-UI
+// rollback path: an update targeting this specific mock item always fails, every other
+// item always succeeds. Keying the sentinel off the item id (rather than off the target
+// status, e.g. always rejecting "archived") avoids permanently breaking a real status
+// value for every other item, while staying just as deterministic and Playwright-testable.
+export const SIMULATED_FAILURE_ITEM_ID = 'cmp_0001';
+
+export type UpdateItemStatusResult =
+	{ ok: true; item: Item } | { ok: false; reason: 'not_found' | 'simulated_failure' };
+
+export function updateItemStatus(id: string, status: ItemStatus): UpdateItemStatusResult {
+	const items = getItemsStore();
+	const item = items.find((candidate) => candidate.id === id);
+
+	if (!item) {
+		return { ok: false, reason: 'not_found' };
+	}
+	if (id === SIMULATED_FAILURE_ITEM_ID) {
+		return { ok: false, reason: 'simulated_failure' };
+	}
+
+	item.status = status;
+	item.updatedAt = new Date().toISOString();
+	return { ok: true, item };
 }

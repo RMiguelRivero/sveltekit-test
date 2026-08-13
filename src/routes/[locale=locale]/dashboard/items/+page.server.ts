@@ -1,7 +1,14 @@
-import type { PageServerLoad } from './$types';
-import { getValidatedItems } from '$lib/server/api';
-import { queryItems, type PaginatedItems } from '$lib/server/items';
+import { z } from 'zod';
+import { error, fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+import {
+	getItemsStore,
+	queryItems,
+	updateItemStatus,
+	type PaginatedItems,
+} from '$lib/server/items';
 import { parseItemsQuery } from '$lib/items-url-state';
+import { itemUpdateSchema } from '$lib/schemas';
 
 // This table gets a mutation endpoint in step 14 (inline edit): a write path wants
 // consistent single-region execution and headroom for a real DB driver later, unlike
@@ -36,7 +43,7 @@ export const load: PageServerLoad = ({ url }) => {
 	// in the artificially delayed promise, since that's the part the brief asks to
 	// stream — `itemsPromise` is intentionally not awaited here so SvelteKit streams it
 	// to the client instead of blocking the whole response on it.
-	const result = queryItems(getValidatedItems(), query);
+	const result = queryItems(getItemsStore(), query);
 
 	return {
 		query,
@@ -48,4 +55,42 @@ export const load: PageServerLoad = ({ url }) => {
 		},
 		itemsPromise: fetchItemRows(result.items),
 	};
+};
+
+// Distinct from the `{:catch}` block on the client (step 13), which handles the whole
+// `itemsPromise` read failing — this action handles a single row's *write* failing after
+// the rest of the table already loaded successfully. Full-table-load failure and
+// single-row-edit failure are two separate, deliberately designed partial-failure states,
+// not variations of the same thing: the former needs a retry affordance for the whole
+// table, the latter needs an optimistic rollback + toast scoped to one row.
+export const actions: Actions = {
+	updateStatus: async ({ request, locals }) => {
+		// Defense in depth: the dashboard layout guard (step 12) already redirects
+		// anonymous users away before they ever reach this route, but this endpoint
+		// should never trust that alone.
+		if (!locals.user) {
+			error(401, 'Unauthorized');
+		}
+
+		const formData = Object.fromEntries(await request.formData());
+		const result = itemUpdateSchema.safeParse(formData);
+
+		if (!result.success) {
+			return fail(400, { errors: z.flattenError(result.error).fieldErrors });
+		}
+
+		const updateResult = updateItemStatus(result.data.id, result.data.status);
+
+		if (!updateResult.ok) {
+			if (updateResult.reason === 'not_found') {
+				return fail(404, { message: 'Item not found.' });
+			}
+			// Simulated failure path — see SIMULATED_FAILURE_ITEM_ID in $lib/server/items,
+			// a deliberate, deterministic trigger (not random flakiness) so the rollback
+			// path is reliably testable in Playwright (step 17).
+			return fail(500, { message: 'Could not save the update.' });
+		}
+
+		return { success: true, item: updateResult.item };
+	},
 };
