@@ -60,6 +60,8 @@
 	"dashboard.title": "Dashboard",
 	"dashboard.meta.title": "Dashboard",
 	"dashboard.meta.description": "Deine Kampagnen auf einen Blick.",
+	"dashboard.welcome": "Willkommen zurück, {name}.",
+	"dashboard.viewItems": "Kampagnen ansehen",
 	"dashboard.items.title": "Kampagnen",
 	"dashboard.items.new": "Neue Kampagne",
 	"dashboard.items.empty": "Noch keine Kampagnen.",

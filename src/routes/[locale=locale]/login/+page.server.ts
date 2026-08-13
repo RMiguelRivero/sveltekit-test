@@ -11,14 +11,25 @@ import type { Actions, PageServerLoad } from './$types';
 // `node:crypto` HMAC signing in the session module needs the Node runtime, not edge.
 export const config = { runtime: 'nodejs20.x' };
 
-export const load: PageServerLoad = ({ locals, params }) => {
+// Only accept a same-locale, in-app path as a post-login redirect target — anything
+// else (an absolute URL, a different locale, a bare "//evil.com") falls back to the
+// dashboard, which prevents `redirectTo` from being used as an open-redirect vector.
+function resolveRedirectTarget(locale: string, redirectTo: string | null): string {
+	const fallback = `/${locale}/dashboard`;
+	if (!redirectTo || !redirectTo.startsWith(`/${locale}/`)) {
+		return fallback;
+	}
+	return redirectTo;
+}
+
+export const load: PageServerLoad = ({ locals, params, url }) => {
 	if (locals.user) {
-		throw redirect(303, `/${params.locale}/dashboard`);
+		throw redirect(303, resolveRedirectTarget(params.locale, url.searchParams.get('redirectTo')));
 	}
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, params }) => {
+	default: async ({ request, cookies, params, url }) => {
 		const formData = Object.fromEntries(await request.formData());
 		const result = loginPayloadSchema.safeParse(formData);
 
@@ -44,6 +55,6 @@ export const actions: Actions = {
 			maxAge: SESSION_DURATION_SECONDS,
 		});
 
-		throw redirect(303, `/${params.locale}/dashboard`);
+		throw redirect(303, resolveRedirectTarget(params.locale, url.searchParams.get('redirectTo')));
 	},
 };
