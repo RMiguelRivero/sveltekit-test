@@ -19,6 +19,7 @@
 	import type { ItemSortColumn, ItemsQuery } from '$lib/server/items';
 	import { buildItemsQueryString } from '$lib/items-url-state';
 	import { capitalize } from '$lib/utils/capitalize';
+	import { debounce } from '$lib/utils/debounce';
 	import { toPathname } from '$lib/utils/toPathname';
 	import type { PageData } from './$types';
 
@@ -28,6 +29,7 @@
 	const CHANNEL_OPTIONS = itemChannelSchema.options;
 	const SKELETON_ROW_COUNT = 8;
 	const TABLE_COLUMN_COUNT = 8;
+	const SEARCH_DEBOUNCE_MS = 300;
 
 	const STATUS_BADGE_VARIANT: Record<ItemStatus, BadgeVariant> = {
 		draft: 'outline',
@@ -88,13 +90,18 @@
 		});
 	}
 
-	function submitSearch(event: SubmitEvent): void {
-		event.preventDefault();
+	function navigateSearch(value: string): void {
 		navigateToQuery({
 			...data.query,
 			page: 1,
-			filters: { ...data.query.filters, q: searchInput.trim() || undefined },
+			filters: { ...data.query.filters, q: value.trim() || undefined },
 		});
+	}
+
+	const debouncedNavigateSearch = debounce(navigateSearch, SEARCH_DEBOUNCE_MS);
+
+	function handleSearchInput(event: Event): void {
+		debouncedNavigateSearch((event.target as HTMLInputElement).value);
 	}
 
 	function clearFilters(): void {
@@ -151,21 +158,17 @@
 
 	<Card class="mb-6 p-4">
 		<div class="flex flex-wrap items-start gap-6">
-			<form class="flex items-end gap-2" onsubmit={submitSearch}>
-				<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="items-search">
-					{data.translations.dashboard.items.filters.search}
-					<Input
-						id="items-search"
-						type="search"
-						placeholder={data.translations.dashboard.items.filters.searchPlaceholder}
-						bind:value={searchInput}
-						class="w-56"
-					/>
-				</label>
-				<Button type="submit" variant="secondary">
-					{data.translations.dashboard.items.filters.apply}
-				</Button>
-			</form>
+			<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="items-search">
+				{data.translations.dashboard.items.filters.search}
+				<Input
+					id="items-search"
+					type="search"
+					placeholder={data.translations.dashboard.items.filters.searchPlaceholder}
+					bind:value={searchInput}
+					oninput={handleSearchInput}
+					class="w-56"
+				/>
+			</label>
 
 			<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="items-status">
 				{data.translations.dashboard.items.filters.status}
@@ -275,7 +278,7 @@
 						<tr class="border-t border-border">
 							{#each Array(TABLE_COLUMN_COUNT) as __, colIndex (colIndex)}
 								<td class="px-4 py-3">
-									<div class="h-4 w-full max-w-24 animate-pulse rounded bg-muted"></div>
+									<div class="h-5 w-full max-w-24 animate-pulse rounded bg-muted"></div>
 								</td>
 							{/each}
 						</tr>

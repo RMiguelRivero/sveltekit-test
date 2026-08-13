@@ -79,7 +79,6 @@
 	"dashboard.items.filters.allChannels": "All channels",
 	"dashboard.items.filters.search": "Search",
 	"dashboard.items.filters.searchPlaceholder": "Search campaigns…",
-	"dashboard.items.filters.apply": "Apply",
 	"dashboard.items.filters.clear": "Clear filters",
 	"dashboard.items.pagination.previous": "← Previous",
 	"dashboard.items.pagination.next": "Next →",

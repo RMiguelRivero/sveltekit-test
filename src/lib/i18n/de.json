@@ -79,7 +79,6 @@
 	"dashboard.items.filters.allChannels": "Alle Kanäle",
 	"dashboard.items.filters.search": "Suche",
 	"dashboard.items.filters.searchPlaceholder": "Kampagnen durchsuchen…",
-	"dashboard.items.filters.apply": "Anwenden",
 	"dashboard.items.filters.clear": "Filter zurücksetzen",
 	"dashboard.items.pagination.previous": "← Zurück",
 	"dashboard.items.pagination.next": "Weiter →",
