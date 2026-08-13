@@ -56,13 +56,31 @@
 			>
 				{data.translations.nav.search}
 			</a>
-			<a
-				href={resolve(toPathname(`/${data.locale}/login`))}
-				aria-current={page.url.pathname === `/${data.locale}/login` ? 'page' : undefined}
-				class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-			>
-				{data.translations.nav.login}
-			</a>
+			{#if data.user}
+				<a
+					href={resolve(toPathname(`/${data.locale}/dashboard`))}
+					aria-current={page.url.pathname === `/${data.locale}/dashboard` ? 'page' : undefined}
+					class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+				>
+					{data.translations.nav.dashboard}
+				</a>
+				<form method="POST" action={resolve(toPathname(`/${data.locale}/logout`))}>
+					<button
+						type="submit"
+						class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+					>
+						{data.translations.nav.logout}
+					</button>
+				</form>
+			{:else}
+				<a
+					href={resolve(toPathname(`/${data.locale}/login`))}
+					aria-current={page.url.pathname === `/${data.locale}/login` ? 'page' : undefined}
+					class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+				>
+					{data.translations.nav.login}
+				</a>
+			{/if}
 		</nav>
 
 		<div class="flex items-center gap-3">

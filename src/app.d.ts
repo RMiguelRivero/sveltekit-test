@@ -2,10 +2,14 @@
 // automatically via tsconfig's `src/**/*.ts` include glob — no reference/import needed.
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
+import type { SessionUser } from '$lib/server/auth/types';
+
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			user: SessionUser | null;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}

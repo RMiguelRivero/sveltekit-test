@@ -1,4 +1,7 @@
 import { LOCALES_SET } from '$lib/i18n/constants';
+import { getValidatedUsers } from '$lib/server/api';
+import { SESSION_COOKIE_NAME } from '$lib/server/auth/auth.constants';
+import { verifySessionCookieValue } from '$lib/server/auth/session';
 import type { Handle } from '@sveltejs/kit';
 
 // sitemap.xml is a generated route living outside the /[locale] subtree (it needs
@@ -24,5 +27,26 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return new Response('Not found', { status: 404 });
 	}
 
+	event.locals.user = resolveSessionUser(event.cookies.get(SESSION_COOKIE_NAME));
+	if (!event.locals.user && event.cookies.get(SESSION_COOKIE_NAME)) {
+		event.cookies.delete(SESSION_COOKIE_NAME, { path: '/' });
+	}
+
 	return resolve(event);
 };
+
+function resolveSessionUser(cookieValue: string | undefined): App.Locals['user'] {
+	if (!cookieValue) {
+		return null;
+	}
+	const session = verifySessionCookieValue(cookieValue);
+	if (!session) {
+		return null;
+	}
+	const user = getValidatedUsers().find((candidate) => candidate.id === session.id);
+	if (!user) {
+		return null;
+	}
+	const { password: _password, ...sessionUser } = user;
+	return sessionUser;
+}
