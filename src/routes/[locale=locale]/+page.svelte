@@ -6,6 +6,7 @@
 	import Heading from '$lib/components/ui/Heading.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import type { PageData } from './$types';
+	import { jsonLdScriptTag } from '$lib/utils/jsonLd';
 
 	interface OrganizationJsonLd {
 		'@context': 'https://schema.org';
@@ -54,7 +55,9 @@
 />
 
 <svelte:head>
-	{@html `<script type="application/ld+json">${JSON.stringify(organizationJsonLd)}</script>`}
+	<!-- eslint-disable svelte/no-at-html-tags -- server-built JSON-LD, escaped in jsonLdScriptTag to prevent </script> breakout -->
+	{@html jsonLdScriptTag(organizationJsonLd)}
+	<!-- eslint-enable svelte/no-at-html-tags -->
 </svelte:head>
 
 <section aria-labelledby="hero-title" class="py-16 text-center sm:py-24">

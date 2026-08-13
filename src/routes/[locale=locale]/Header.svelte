@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { LOCALES, LOCALE_LABELS, type Locale } from '$lib/i18n/constants';
+	import { toPathname } from '$lib/utils/toPathname';
 	import type { LayoutData } from './$types';
 
 	let { data }: { data: LayoutData } = $props();
@@ -19,7 +21,7 @@
 
 	function handleLocaleChange(event: Event): void {
 		const target = event.target as HTMLSelectElement;
-		goto(buildLocaleHref(target.value as Locale));
+		goto(resolve(toPathname(buildLocaleHref(target.value as Locale))));
 	}
 
 	function toggleTheme(): void {
@@ -34,28 +36,28 @@
 	<div class="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-3">
 		<nav aria-label="Main" class="flex items-center gap-4">
 			<a
-				href={`/${data.locale}`}
+				href={resolve(toPathname(`/${data.locale}`))}
 				aria-current={page.url.pathname === `/${data.locale}` ? 'page' : undefined}
 				class="rounded-sm font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 			>
 				{data.translations.nav.home}
 			</a>
 			<a
-				href={`/${data.locale}/blog`}
+				href={resolve(toPathname(`/${data.locale}/blog`))}
 				aria-current={page.url.pathname.startsWith(`/${data.locale}/blog`) ? 'page' : undefined}
 				class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 			>
 				{data.translations.nav.blog}
 			</a>
 			<a
-				href={`/${data.locale}/search`}
+				href={resolve(toPathname(`/${data.locale}/search`))}
 				aria-current={page.url.pathname === `/${data.locale}/search` ? 'page' : undefined}
 				class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 			>
 				{data.translations.nav.search}
 			</a>
 			<a
-				href={`/${data.locale}/login`}
+				href={resolve(toPathname(`/${data.locale}/login`))}
 				aria-current={page.url.pathname === `/${data.locale}/login` ? 'page' : undefined}
 				class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 			>
