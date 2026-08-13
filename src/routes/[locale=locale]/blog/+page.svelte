@@ -11,17 +11,9 @@
 	import Select from '$lib/components/ui/Select.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import type { PageData } from './$types';
+	import { toPathname } from '$lib/utils/toPathname';
 
 	let { data }: { data: PageData } = $props();
-
-	// `resolve()` is typed against a generated union of literal route/pathname templates,
-	// which a computed `string` can never satisfy structurally even when well-formed at
-	// runtime (these pathnames are built from our own locale + query-string logic, always
-	// starting with "/"). Assert the concrete shape `resolve` accepts instead of losing
-	// its base-path resolution and the `svelte/no-navigation-without-resolve` lint check.
-	function toPathname(path: string): `/${string}` {
-		return path as `/${string}`;
-	}
 
 	function buildQueryString(page: number, tags: string[], sort: string): string {
 		const params = new SvelteURLSearchParams();
@@ -42,10 +34,14 @@
 		buildQueryString(data.currentPage, data.currentTags, data.currentSort),
 	);
 	const previousPageUrl = $derived(
-		`${page.url.pathname}${buildQueryString(data.currentPage - 1, data.currentTags, data.currentSort)}`,
+		toPathname(
+			`${page.url.pathname}${buildQueryString(data.currentPage - 1, data.currentTags, data.currentSort)}`,
+		),
 	);
 	const nextPageUrl = $derived(
-		`${page.url.pathname}${buildQueryString(data.currentPage + 1, data.currentTags, data.currentSort)}`,
+		toPathname(
+			`${page.url.pathname}${buildQueryString(data.currentPage + 1, data.currentTags, data.currentSort)}`,
+		),
 	);
 	// Filtered/paginated views are thin, duplicate-content variants of the same list —
 	// keep only the canonical, unfiltered first page indexable.
@@ -54,8 +50,8 @@
 	function sortHandler(event: Event) {
 		const target = event.target as HTMLSelectElement;
 		const qs = buildQueryString(1, data.currentTags, target.value);
-		const url = `${page.url.pathname}${qs}`;
-		goto(resolve(toPathname(url)));
+		const url = toPathname(`${page.url.pathname}${qs}`);
+		goto(resolve(url));
 	}
 
 	function filterByTag(tag: string) {
@@ -67,8 +63,8 @@
 		goto(resolve(toPathname(url)));
 	}
 
-	function buildPostUrl(slug: string): string {
-		return `${page.url.pathname}/${slug}`;
+	function buildPostUrl(slug: string) {
+		return toPathname(`${page.url.pathname}/${slug}`);
 	}
 
 	function readingTimeLabel(minutes: number): string {
@@ -122,10 +118,7 @@
 					</div>
 					<p class="mb-4 leading-relaxed text-foreground">
 						{post.translations[data.locale].excerpt}
-						<a
-							href={resolve(toPathname(buildPostUrl(post.slug)))}
-							class="text-primary hover:underline"
-						>
+						<a href={resolve(buildPostUrl(post.slug))} class="text-primary hover:underline">
 							{data.translations.blog.readMore}
 						</a>
 					</p>
@@ -158,7 +151,7 @@
 				aria-label="Blog pagination"
 			>
 				{#if data.currentPage > 1}
-					<Button href={resolve(toPathname(previousPageUrl))} variant="primary">← Previous</Button>
+					<Button href={resolve(previousPageUrl)} variant="primary">← Previous</Button>
 				{/if}
 
 				<span class="font-medium text-foreground">
@@ -166,7 +159,7 @@
 				</span>
 
 				{#if data.currentPage < data.paginatedPosts.totalPages}
-					<Button href={resolve(toPathname(nextPageUrl))} variant="primary">Next →</Button>
+					<Button href={resolve(nextPageUrl)} variant="primary">Next →</Button>
 				{/if}
 			</nav>
 		{/if}
