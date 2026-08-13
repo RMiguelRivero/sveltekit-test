@@ -9,6 +9,8 @@
 		path: string;
 		image?: string;
 		type?: 'website' | 'article';
+		articlePublishedTime?: string;
+		articleAuthor?: string;
 	}
 
 	function buildLocaleUrl(origin: string, locale: Locale, path: string): string {
@@ -20,7 +22,17 @@
 	import { LOCALES } from '$lib/i18n/constants';
 	import { OG_LOCALE_MAP } from './seo.constants';
 
-	let { title, description, locale, origin, path, image, type = 'website' }: SeoProps = $props();
+	let {
+		title,
+		description,
+		locale,
+		origin,
+		path,
+		image,
+		type = 'website',
+		articlePublishedTime,
+		articleAuthor,
+	}: SeoProps = $props();
 
 	const canonical = $derived(buildLocaleUrl(origin, locale, path));
 	const alternateLocales = $derived(LOCALES.filter((candidate) => candidate !== locale));
@@ -46,6 +58,12 @@
 	{/each}
 	{#if image}
 		<meta property="og:image" content={image} />
+	{/if}
+	{#if type === 'article' && articlePublishedTime}
+		<meta property="article:published_time" content={articlePublishedTime} />
+	{/if}
+	{#if type === 'article' && articleAuthor}
+		<meta property="article:author" content={articleAuthor} />
 	{/if}
 
 	<meta name="twitter:card" content="summary_large_image" />

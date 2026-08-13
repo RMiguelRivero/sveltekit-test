@@ -43,6 +43,7 @@
 	"blog.empty": "No posts found.",
 	"blog.readMore": "Read post",
 	"blog.readingTime": "{minutes} min read",
+	"blog.backToBlog": "← Back to blog",
 	"search.title": "Search",
 	"search.meta.title": "Search",
 	"search.meta.description": "Search posts…",
