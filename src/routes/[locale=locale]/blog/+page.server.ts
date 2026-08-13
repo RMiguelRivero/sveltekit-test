@@ -3,7 +3,6 @@ import { error } from '@sveltejs/kit';
 import { getValidatedPosts } from '$lib/server/api';
 import { loadPosts } from '$lib/server/posts';
 
-export const prerender = true;
 export const load: PageServerLoad = async ({ url, params }) => {
 	const locale = params.locale;
 

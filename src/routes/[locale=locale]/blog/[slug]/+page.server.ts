@@ -2,7 +2,6 @@ import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { getPostBySlug } from '$lib/server/api';
 
-export const prerender = true;
 export const load: PageServerLoad = async ({ params }) => {
 	const slug = params.slug;
 	try {

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	let { data }: { data: PageData } = $props();
-	let post = data.post;
-	let initials = post.author.name
-		.split(' ')
-		.map((n) => n[0])
-		.join('')
-		.toUpperCase();
+	let post = $derived(data.post);
+	let initials = $derived(
+		post.author.name
+			.split(' ')
+			.map((n) => n[0])
+			.join('')
+			.toUpperCase(),
+	);
 </script>
 
 <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
