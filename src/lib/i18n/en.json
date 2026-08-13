@@ -76,5 +76,8 @@
 	"common.retry": "Try again",
 	"common.save": "Save",
 	"common.cancel": "Cancel",
+	"error.notFound.title": "Page not found",
+	"error.notFound.description": "The page you're looking for doesn't exist or has moved.",
+	"error.backHome": "Back to home",
 	"footer.copy": "© 2026 Demo Co."
 }

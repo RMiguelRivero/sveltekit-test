@@ -76,5 +76,8 @@
 	"common.retry": "Erneut versuchen",
 	"common.save": "Speichern",
 	"common.cancel": "Abbrechen",
+	"error.notFound.title": "Seite nicht gefunden",
+	"error.notFound.description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+	"error.backHome": "Zurück zur Startseite",
 	"footer.copy": "© 2026 Demo Co."
 }
