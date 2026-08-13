@@ -66,24 +66,27 @@
 </script>
 
 <div class="flex items-center gap-2">
-	<Badge variant={STATUS_BADGE_VARIANT[item.status]}>{capitalize(item.status)}</Badge>
-	<form method="POST" action="?/updateStatus" use:enhance={handleSubmit}>
-		<input type="hidden" name="id" value={item.id} />
-		<Select
-			name="status"
-			value={item.status}
-			disabled={pending || !editable}
-			aria-busy={pending}
-			aria-label={`Status for ${item.name}`}
-			title={editable ? undefined : "You don't have permission to edit this."}
-			onchange={(event) => event.currentTarget.form?.requestSubmit()}
-			class="w-32 text-xs"
-		>
-			{#each STATUS_OPTIONS as status (status)}
-				<option value={status}>{capitalize(status)}</option>
-			{/each}
-		</Select>
-	</form>
+	{#if editable}
+		<form method="POST" action="?/updateStatus" use:enhance={handleSubmit}>
+			<fieldset disabled={pending}>
+				<input type="hidden" name="id" value={item.id} />
+				<Select
+					name="status"
+					value={item.status}
+					aria-busy={pending}
+					aria-label={`Status for ${item.name}`}
+					onchange={(event) => event.currentTarget.form?.requestSubmit()}
+					class="w-32 text-xs"
+				>
+					{#each STATUS_OPTIONS as status (status)}
+						<option value={status}>{capitalize(status)}</option>
+					{/each}
+				</Select>
+			</fieldset>
+		</form>
+	{:else}
+		<Badge variant={STATUS_BADGE_VARIANT[item.status]}>{capitalize(item.status)}</Badge>
+	{/if}
 	{#if pending}
 		<span class="text-xs text-muted-foreground">Saving…</span>
 	{/if}
