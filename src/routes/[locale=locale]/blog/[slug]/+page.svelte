@@ -6,12 +6,11 @@
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
 	import Seo from '$lib/components/Seo.svelte';
+	import { SITE_NAME } from '$lib/components/seo.constants';
 	import type { Locale } from '$lib/i18n/constants';
 	import type { PageData } from './$types';
 	import { toPathname } from '$lib/utils/toPathname';
 	import { jsonLdScriptTag } from '$lib/utils/jsonLd';
-
-	const SITE_NAME = 'Demo Co.';
 
 	interface ArticleJsonLd {
 		'@context': 'https://schema.org';

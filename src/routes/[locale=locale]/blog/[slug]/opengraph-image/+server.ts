@@ -1,0 +1,122 @@
+import type { ReactElement } from 'react';
+import { ImageResponse } from '@vercel/og';
+import type { RequestHandler } from './$types';
+import { getPostBySlug } from '$lib/server/api';
+import { translations, type Locale } from '$lib/i18n/constants';
+import { SITE_NAME } from '$lib/components/seo.constants';
+
+// Edge: this route is stateless, read-only, has no Node-only dependencies, and is
+// fetched by social-media crawlers worldwide, so a low-cold-start, globally
+// distributed runtime is a better fit than a single-region Node function.
+export const config = { runtime: 'edge' };
+
+const IMAGE_WIDTH = 1200;
+const IMAGE_HEIGHT = 630;
+
+function h(type: string, props: Record<string, unknown>, children?: unknown): ReactElement {
+	return { type, key: null, props: { ...props, children } } as unknown as ReactElement;
+}
+
+function readingTimeLabel(locale: Locale, minutes: number): string {
+	return translations[locale].blog.readingTime.replace('{minutes}', String(minutes));
+}
+
+function buildOgImageElement(
+	title: string,
+	authorName: string,
+	readingTime: string,
+	coverColor: string,
+): ReactElement {
+	return h(
+		'div',
+		{
+			style: {
+				display: 'flex',
+				flexDirection: 'column',
+				justifyContent: 'space-between',
+				width: `${IMAGE_WIDTH}px`,
+				height: `${IMAGE_HEIGHT}px`,
+				padding: '64px',
+				backgroundColor: coverColor,
+				fontFamily: 'sans-serif',
+			},
+		},
+		[
+			h('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } }, [
+				h('div', {
+					style: {
+						display: 'flex',
+						width: '28px',
+						height: '28px',
+						borderRadius: '8px',
+						backgroundColor: 'rgba(255, 255, 255, 0.9)',
+					},
+				}),
+				h(
+					'span',
+					{ style: { display: 'flex', fontSize: '28px', fontWeight: 700, color: 'white' } },
+					SITE_NAME,
+				),
+			]),
+			h(
+				'div',
+				{
+					style: {
+						display: 'flex',
+						flexDirection: 'column',
+						gap: '24px',
+						padding: '40px',
+						borderRadius: '24px',
+						backgroundColor: 'rgba(0, 0, 0, 0.45)',
+					},
+				},
+				[
+					h(
+						'span',
+						{
+							style: {
+								display: 'flex',
+								fontSize: '56px',
+								fontWeight: 700,
+								lineHeight: 1.25,
+								color: 'white',
+							},
+						},
+						title,
+					),
+					h(
+						'span',
+						{ style: { display: 'flex', fontSize: '28px', color: 'rgba(255, 255, 255, 0.85)' } },
+						`${authorName} · ${readingTime}`,
+					),
+				],
+			),
+		],
+	);
+}
+
+export const GET: RequestHandler = async ({ params }) => {
+	const post = getPostBySlug(params.slug);
+	if (!post) {
+		return new Response('Not found', { status: 404 });
+	}
+
+	const translation = post.translations[params.locale];
+	const element = buildOgImageElement(
+		translation.title,
+		post.author.name,
+		readingTimeLabel(params.locale, post.readingTimeMinutes),
+		post.coverColor,
+	);
+
+	return new ImageResponse(element, {
+		width: IMAGE_WIDTH,
+		height: IMAGE_HEIGHT,
+		headers: {
+			// Lowercase to match (and overwrite) @vercel/og's own default "cache-control" key —
+			// a differently-cased key would survive as a separate object property and get
+			// merged into a combined, invalid header value instead of replacing the default.
+			'cache-control': 'public, immutable, max-age=31536000',
+		},
+	});
+};
