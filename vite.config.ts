@@ -25,6 +25,20 @@ export default defineConfig({
 			alias: {
 				classname: 'src/lib/utils/cn.ts',
 			},
+
+			prerender: {
+				// Real origin for canonical/OG URLs baked into prerendered HTML — otherwise
+				// SvelteKit defaults url.origin to the placeholder "http://sveltekit-prerender".
+				origin: 'https://demo-co.example.com',
+				handleHttpError: ({ path, message }) => {
+					// /login and /dashboard are built in later steps of this scripted rebuild;
+					// don't fail prerendering of already-static pages that link to them yet.
+					if (/^\/(en|de)\/(login|dashboard)(\/|$)/.test(path)) {
+						return;
+					}
+					throw new Error(message);
+				},
+			},
 		}),
 	],
 	test: {
