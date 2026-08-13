@@ -99,6 +99,7 @@ export const loginResultSchema = z.object({
 export type Locale = z.infer<typeof localeSchema>;
 export type Post = z.infer<typeof postSchema>;
 export type User = z.infer<typeof userSchema>;
+export type UserRole = z.infer<typeof userRoleSchema>;
 export type Item = z.infer<typeof itemSchema>;
 export type ItemStatus = z.infer<typeof itemStatusSchema>;
 export type ItemChannel = z.infer<typeof itemChannelSchema>;

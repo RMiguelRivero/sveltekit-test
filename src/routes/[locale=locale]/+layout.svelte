@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Footer from './Footer.svelte';
 	import Header from './Header.svelte';
+	import Toast from '$lib/components/ui/Toast.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
@@ -20,3 +21,5 @@
 </main>
 
 <Footer {data} />
+
+<Toast />

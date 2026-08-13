@@ -2,22 +2,24 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
-	import type { BadgeVariant } from '$lib/components/ui/types';
+	import EditableStatusCell from '$lib/components/dashboard/EditableStatusCell.svelte';
+	import { addToast } from '$lib/components/ui/toasts.svelte';
 	import {
 		itemChannelSchema,
 		itemStatusSchema,
+		type Item,
 		type ItemChannel,
 		type ItemStatus,
 	} from '$lib/schemas';
 	import type { ItemSortColumn, ItemsQuery } from '$lib/server/items';
 	import { buildItemsQueryString } from '$lib/items-url-state';
+	import { canEditItems } from '$lib/permissions';
 	import { capitalize } from '$lib/utils/capitalize';
 	import { debounce } from '$lib/utils/debounce';
 	import { toPathname } from '$lib/utils/toPathname';
@@ -25,20 +27,13 @@
 
 	let { data }: { data: PageData } = $props();
 
+	const canEditStatus = $derived(canEditItems(data.user.role));
+
 	const STATUS_OPTIONS = itemStatusSchema.options;
 	const CHANNEL_OPTIONS = itemChannelSchema.options;
 	const SKELETON_ROW_COUNT = 8;
 	const TABLE_COLUMN_COUNT = 8;
 	const SEARCH_DEBOUNCE_MS = 300;
-
-	const STATUS_BADGE_VARIANT: Record<ItemStatus, BadgeVariant> = {
-		draft: 'outline',
-		scheduled: 'default',
-		active: 'success',
-		paused: 'warning',
-		completed: 'default',
-		archived: 'outline',
-	};
 
 	const currencyFormatter = new Intl.NumberFormat('en-US', {
 		style: 'currency',
@@ -47,6 +42,69 @@
 	});
 
 	let searchInput = $derived(data.query.filters?.q ?? '');
+
+	// Local `$state` mirror of the resolved rows, kept separate from the server-streamed
+	// `data.itemsPromise` — this is the source of truth for rendering *and* the optimistic
+	// status edits below, since a devalue-streamed promise itself can't be mutated in place.
+	// Re-synced from scratch whenever `data.itemsPromise` changes identity (new page, sort,
+	// or filter), which is also when the skeleton should reappear.
+	let rows: Item[] = $state([]);
+	let loadState: 'pending' | 'ready' | 'error' = $state('pending');
+	let pendingRowIds: Set<string> = $state(new Set());
+
+	$effect(() => {
+		const itemsPromise = data.itemsPromise;
+		loadState = 'pending';
+		rows = [];
+		let cancelled = false;
+
+		itemsPromise
+			.then((resolved) => {
+				if (cancelled) return;
+				rows = resolved.map((item) => ({ ...item }));
+				loadState = 'ready';
+			})
+			.catch(() => {
+				if (cancelled) return;
+				loadState = 'error';
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	function findRowIndex(id: string): number {
+		return rows.findIndex((row) => row.id === id);
+	}
+
+	function applyRowStatus(id: string, status: ItemStatus): void {
+		const index = findRowIndex(id);
+		if (index !== -1) {
+			rows[index] = { ...rows[index], status };
+		}
+	}
+
+	function reconcileRow(item: Item): void {
+		const index = findRowIndex(item.id);
+		if (index !== -1) {
+			rows[index] = item;
+		}
+	}
+
+	function setRowPending(id: string, isPending: boolean): void {
+		const next = new Set(pendingRowIds);
+		if (isPending) {
+			next.add(id);
+		} else {
+			next.delete(id);
+		}
+		pendingRowIds = next;
+	}
+
+	function showEditError(message: string): void {
+		addToast(message, 'error');
+	}
 
 	function formatChannelLabel(channel: ItemChannel): string {
 		return channel === 'sms' ? 'SMS' : capitalize(channel);
@@ -273,7 +331,12 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#await data.itemsPromise}
+				<!-- Two distinct, deliberately designed partial-failure states: the whole
+				`itemsPromise` read failing (below, full-table retry) vs. a single row's
+				*write* failing after the table already loaded (EditableStatusCell's optimistic
+				rollback + toast, scoped to that one row) — see the server action for the
+				write-side half of this comment. -->
+				{#if loadState === 'pending'}
 					{#each Array(SKELETON_ROW_COUNT) as _, rowIndex (rowIndex)}
 						<tr class="border-t border-border">
 							{#each Array(TABLE_COLUMN_COUNT) as __, colIndex (colIndex)}
@@ -283,34 +346,7 @@
 							{/each}
 						</tr>
 					{/each}
-				{:then items}
-					{#if items.length === 0}
-						<tr>
-							<td colspan={TABLE_COLUMN_COUNT} class="p-0">
-								<Card class="m-4 py-12 text-center text-muted-foreground">
-									{data.translations.dashboard.items.empty}
-								</Card>
-							</td>
-						</tr>
-					{:else}
-						{#each items as item (item.id)}
-							<tr class="border-t border-border">
-								<td class="px-4 py-3 font-medium text-foreground">{item.name}</td>
-								<td class="px-4 py-3">
-									<Badge variant={STATUS_BADGE_VARIANT[item.status]}
-										>{capitalize(item.status)}</Badge
-									>
-								</td>
-								<td class="px-4 py-3 text-muted-foreground">{formatChannelLabel(item.channel)}</td>
-								<td class="px-4 py-3 text-muted-foreground">{item.owner.name}</td>
-								<td class="px-4 py-3">{formatCurrency(item.budget)}</td>
-								<td class="px-4 py-3">{formatCurrency(item.spent)}</td>
-								<td class="px-4 py-3">{formatCtr(item.ctr)}</td>
-								<td class="px-4 py-3 text-muted-foreground">{formatDate(item.updatedAt)}</td>
-							</tr>
-						{/each}
-					{/if}
-				{:catch}
+				{:else if loadState === 'error'}
 					<tr>
 						<td colspan={TABLE_COLUMN_COUNT} class="p-0">
 							<Card class="m-4 border-destructive/50 py-12 text-center">
@@ -321,7 +357,40 @@
 							</Card>
 						</td>
 					</tr>
-				{/await}
+				{:else if rows.length === 0}
+					<tr>
+						<td colspan={TABLE_COLUMN_COUNT} class="p-0">
+							<Card class="m-4 py-12 text-center text-muted-foreground">
+								{data.translations.dashboard.items.empty}
+							</Card>
+						</td>
+					</tr>
+				{:else}
+					{#each rows as row (row.id)}
+						<tr class="border-t border-border">
+							<td class="px-4 py-3 font-medium text-foreground">{row.name}</td>
+							<td class="px-4 py-3">
+								<EditableStatusCell
+									item={row}
+									pending={pendingRowIds.has(row.id)}
+									editable={canEditStatus}
+									errorMessage={data.translations.common.error}
+									onOptimisticUpdate={(status) => applyRowStatus(row.id, status)}
+									onReconcile={reconcileRow}
+									onRollback={(status) => applyRowStatus(row.id, status)}
+									onPendingChange={(isPending) => setRowPending(row.id, isPending)}
+									onError={showEditError}
+								/>
+							</td>
+							<td class="px-4 py-3 text-muted-foreground">{formatChannelLabel(row.channel)}</td>
+							<td class="px-4 py-3 text-muted-foreground">{row.owner.name}</td>
+							<td class="px-4 py-3">{formatCurrency(row.budget)}</td>
+							<td class="px-4 py-3">{formatCurrency(row.spent)}</td>
+							<td class="px-4 py-3">{formatCtr(row.ctr)}</td>
+							<td class="px-4 py-3 text-muted-foreground">{formatDate(row.updatedAt)}</td>
+						</tr>
+					{/each}
+				{/if}
 			</tbody>
 		</table>
 	</div>

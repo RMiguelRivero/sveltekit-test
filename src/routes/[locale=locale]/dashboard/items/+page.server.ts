@@ -9,6 +9,7 @@ import {
 } from '$lib/server/items';
 import { parseItemsQuery } from '$lib/items-url-state';
 import { itemUpdateSchema } from '$lib/schemas';
+import { canEditItems } from '$lib/permissions';
 
 // This table gets a mutation endpoint in step 14 (inline edit): a write path wants
 // consistent single-region execution and headroom for a real DB driver later, unlike
@@ -70,6 +71,12 @@ export const actions: Actions = {
 		// should never trust that alone.
 		if (!locals.user) {
 			error(401, 'Unauthorized');
+		}
+		// The `viewer` role is read-only by convention (see $lib/permissions) — the client
+		// already disables the edit control for viewers, but that's advisory only, so the
+		// actual authorization boundary has to live here too.
+		if (!canEditItems(locals.user.role)) {
+			error(403, 'Forbidden');
 		}
 
 		const formData = Object.fromEntries(await request.formData());
