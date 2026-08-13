@@ -46,11 +46,22 @@ export const itemOwnerSchema = z.object({
 	name: z.string(),
 });
 
+export const itemStatusSchema = z.enum([
+	'draft',
+	'scheduled',
+	'active',
+	'paused',
+	'completed',
+	'archived',
+]);
+
+export const itemChannelSchema = z.enum(['email', 'sms', 'web', 'social', 'push']);
+
 export const itemSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	status: z.enum(['draft', 'scheduled', 'active', 'paused', 'completed', 'archived']),
-	channel: z.enum(['email', 'sms', 'web', 'social', 'push']),
+	status: itemStatusSchema,
+	channel: itemChannelSchema,
 	owner: itemOwnerSchema,
 	budget: z.number(),
 	spent: z.number(),
@@ -82,5 +93,7 @@ export type Locale = z.infer<typeof localeSchema>;
 export type Post = z.infer<typeof postSchema>;
 export type User = z.infer<typeof userSchema>;
 export type Item = z.infer<typeof itemSchema>;
+export type ItemStatus = z.infer<typeof itemStatusSchema>;
+export type ItemChannel = z.infer<typeof itemChannelSchema>;
 export type LoginPayload = z.infer<typeof loginPayloadSchema>;
 export type LoginResult = z.infer<typeof loginResultSchema>;
