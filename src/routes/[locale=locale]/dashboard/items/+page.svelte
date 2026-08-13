@@ -8,6 +8,7 @@
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
+	import Select from '$lib/components/ui/Select.svelte';
 	import type { BadgeVariant } from '$lib/components/ui/types';
 	import {
 		itemChannelSchema,
@@ -69,20 +70,22 @@
 		goto(resolve(queryHref(query)));
 	}
 
-	function toggleStatus(status: ItemStatus): void {
-		const current = data.query.filters?.status ?? [];
-		const next = current.includes(status)
-			? current.filter((value) => value !== status)
-			: [...current, status];
-		navigateToQuery({ ...data.query, page: 1, filters: { ...data.query.filters, status: next } });
+	function selectStatus(event: Event): void {
+		const value = (event.target as HTMLSelectElement).value as ItemStatus | '';
+		navigateToQuery({
+			...data.query,
+			page: 1,
+			filters: { ...data.query.filters, status: value ? [value] : [] },
+		});
 	}
 
-	function toggleChannel(channel: ItemChannel): void {
-		const current = data.query.filters?.channel ?? [];
-		const next = current.includes(channel)
-			? current.filter((value) => value !== channel)
-			: [...current, channel];
-		navigateToQuery({ ...data.query, page: 1, filters: { ...data.query.filters, channel: next } });
+	function selectChannel(event: Event): void {
+		const value = (event.target as HTMLSelectElement).value as ItemChannel | '';
+		navigateToQuery({
+			...data.query,
+			page: 1,
+			filters: { ...data.query.filters, channel: value ? [value] : [] },
+		});
 	}
 
 	function submitSearch(event: SubmitEvent): void {
@@ -164,43 +167,35 @@
 				</Button>
 			</form>
 
-			<fieldset class="flex flex-col gap-2">
-				<legend class="text-sm font-medium text-foreground">
-					{data.translations.dashboard.items.filters.status}
-				</legend>
-				<div class="flex flex-wrap gap-3">
+			<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="items-status">
+				{data.translations.dashboard.items.filters.status}
+				<Select
+					id="items-status"
+					value={data.query.filters?.status?.[0] ?? ''}
+					onchange={selectStatus}
+					class="w-40"
+				>
+					<option value="">{data.translations.dashboard.items.filters.allStatuses}</option>
 					{#each STATUS_OPTIONS as status (status)}
-						<label class="flex items-center gap-1.5 text-sm text-foreground">
-							<input
-								type="checkbox"
-								checked={data.query.filters?.status?.includes(status) ?? false}
-								onchange={() => toggleStatus(status)}
-								class="h-4 w-4 rounded border-border text-primary focus-visible:ring-2 focus-visible:ring-ring"
-							/>
-							{capitalize(status)}
-						</label>
+						<option value={status}>{capitalize(status)}</option>
 					{/each}
-				</div>
-			</fieldset>
+				</Select>
+			</label>
 
-			<fieldset class="flex flex-col gap-2">
-				<legend class="text-sm font-medium text-foreground">
-					{data.translations.dashboard.items.filters.channel}
-				</legend>
-				<div class="flex flex-wrap gap-3">
+			<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="items-channel">
+				{data.translations.dashboard.items.filters.channel}
+				<Select
+					id="items-channel"
+					value={data.query.filters?.channel?.[0] ?? ''}
+					onchange={selectChannel}
+					class="w-40"
+				>
+					<option value="">{data.translations.dashboard.items.filters.allChannels}</option>
 					{#each CHANNEL_OPTIONS as channel (channel)}
-						<label class="flex items-center gap-1.5 text-sm text-foreground">
-							<input
-								type="checkbox"
-								checked={data.query.filters?.channel?.includes(channel) ?? false}
-								onchange={() => toggleChannel(channel)}
-								class="h-4 w-4 rounded border-border text-primary focus-visible:ring-2 focus-visible:ring-ring"
-							/>
-							{formatChannelLabel(channel)}
-						</label>
+						<option value={channel}>{formatChannelLabel(channel)}</option>
 					{/each}
-				</div>
-			</fieldset>
+				</Select>
+			</label>
 
 			{#if hasActiveFilters}
 				<Button type="button" variant="ghost" size="sm" onclick={clearFilters} class="self-end">
