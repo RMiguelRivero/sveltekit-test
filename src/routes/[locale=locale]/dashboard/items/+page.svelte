@@ -2,6 +2,14 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
+	import ChevronUp from '@lucide/svelte/icons/chevron-up';
+	import SearchIcon from '@lucide/svelte/icons/search';
+	import AlertCircle from '@lucide/svelte/icons/alert-circle';
+	import Inbox from '@lucide/svelte/icons/inbox';
+	import AvatarChip from '$lib/components/ui/AvatarChip.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Container from '$lib/components/ui/Container.svelte';
@@ -180,11 +188,11 @@
 		return data.query.sort.direction === 'asc' ? 'ascending' : 'descending';
 	}
 
-	function sortIndicator(column: ItemSortColumn): string {
+	function sortIndicatorDirection(column: ItemSortColumn): 'asc' | 'desc' | null {
 		if (data.query.sort?.column !== column) {
-			return '';
+			return null;
 		}
-		return data.query.sort.direction === 'asc' ? ' ▲' : ' ▼';
+		return data.query.sort.direction;
 	}
 
 	function retry(): void {
@@ -211,21 +219,49 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
+{#snippet sortIcon(column: ItemSortColumn)}
+	{@const direction = sortIndicatorDirection(column)}
+	{#if direction === 'asc'}
+		<ChevronUp class="h-3.5 w-3.5" aria-hidden="true" />
+	{:else if direction === 'desc'}
+		<ChevronDown class="h-3.5 w-3.5" aria-hidden="true" />
+	{:else}
+		<ChevronsUpDown class="h-3.5 w-3.5 text-muted-foreground/50" aria-hidden="true" />
+	{/if}
+{/snippet}
+
 <Container size="lg" class="py-8">
+	<nav aria-label="Breadcrumb" class="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+		<a
+			href={resolve(toPathname(`/${data.locale}/dashboard`))}
+			class="rounded-sm hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+		>
+			{data.translations.dashboard.title}
+		</a>
+		<ChevronRight class="h-3.5 w-3.5" aria-hidden="true" />
+		<span class="text-foreground">{data.translations.dashboard.items.title}</span>
+	</nav>
+
 	<Heading level={1} class="mb-6">{data.translations.dashboard.items.title}</Heading>
 
 	<Card class="mb-6 p-4">
 		<div class="flex flex-wrap items-start gap-6">
 			<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="items-search">
 				{data.translations.dashboard.items.filters.search}
-				<Input
-					id="items-search"
-					type="search"
-					placeholder={data.translations.dashboard.items.filters.searchPlaceholder}
-					bind:value={searchInput}
-					oninput={handleSearchInput}
-					class="w-56"
-				/>
+				<div class="relative">
+					<SearchIcon
+						class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+						aria-hidden="true"
+					/>
+					<Input
+						id="items-search"
+						type="search"
+						placeholder={data.translations.dashboard.items.filters.searchPlaceholder}
+						bind:value={searchInput}
+						oninput={handleSearchInput}
+						class="w-56 pl-9"
+					/>
+				</div>
 			</label>
 
 			<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="items-status">
@@ -266,66 +302,67 @@
 		</div>
 	</Card>
 
-	<div class="overflow-x-auto rounded-lg border border-border">
+	<div class="overflow-x-auto rounded-xl border border-border">
 		<table class="w-full text-sm">
 			<thead
 				class="bg-muted/50 text-left text-xs font-medium tracking-wide text-muted-foreground uppercase"
 			>
 				<tr>
-					<th scope="col" class="px-4 py-3" aria-sort={ariaSort('name')}>
+					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('name')}>
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 font-medium uppercase"
 							onclick={() => sortBy('name')}
 						>
-							{data.translations.dashboard.items.column.name}{sortIndicator('name')}
+							{data.translations.dashboard.items.column.name}{@render sortIcon('name')}
 						</button>
 					</th>
-					<th scope="col" class="px-4 py-3" aria-sort={ariaSort('status')}>
+					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('status')}>
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 font-medium uppercase"
 							onclick={() => sortBy('status')}
 						>
-							{data.translations.dashboard.items.column.status}{sortIndicator('status')}
+							{data.translations.dashboard.items.column.status}{@render sortIcon('status')}
 						</button>
 					</th>
-					<th scope="col" class="px-4 py-3">{data.translations.dashboard.items.column.channel}</th>
-					<th scope="col" class="px-4 py-3">{data.translations.dashboard.items.column.owner}</th>
-					<th scope="col" class="px-4 py-3" aria-sort={ariaSort('budget')}>
+					<th scope="col" class="px-4 py-3.5">{data.translations.dashboard.items.column.channel}</th
+					>
+					<th scope="col" class="px-4 py-3.5">{data.translations.dashboard.items.column.owner}</th>
+					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('budget')}>
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 font-medium uppercase"
 							onclick={() => sortBy('budget')}
 						>
-							{data.translations.dashboard.items.column.budget}{sortIndicator('budget')}
+							{data.translations.dashboard.items.column.budget}{@render sortIcon('budget')}
 						</button>
 					</th>
-					<th scope="col" class="px-4 py-3" aria-sort={ariaSort('spent')}>
+					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('spent')}>
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 font-medium uppercase"
 							onclick={() => sortBy('spent')}
 						>
-							{data.translations.dashboard.items.column.spent}{sortIndicator('spent')}
+							{data.translations.dashboard.items.column.spent}{@render sortIcon('spent')}
 						</button>
 					</th>
-					<th scope="col" class="px-4 py-3" aria-sort={ariaSort('ctr')}>
+					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('ctr')}>
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 font-medium uppercase"
 							onclick={() => sortBy('ctr')}
 						>
-							{data.translations.dashboard.items.column.ctr}{sortIndicator('ctr')}
+							{data.translations.dashboard.items.column.ctr}{@render sortIcon('ctr')}
 						</button>
 					</th>
-					<th scope="col" class="px-4 py-3" aria-sort={ariaSort('updatedAt')}>
+					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('updatedAt')}>
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 font-medium uppercase"
 							onclick={() => sortBy('updatedAt')}
 						>
-							{data.translations.dashboard.items.column.updated}{sortIndicator('updatedAt')}
+							{data.translations.dashboard.items.column.updated}{@render sortIcon('updatedAt')}
 						</button>
 					</th>
 				</tr>
@@ -340,7 +377,7 @@
 					{#each Array(SKELETON_ROW_COUNT) as _, rowIndex (rowIndex)}
 						<tr class="border-t border-border">
 							{#each Array(TABLE_COLUMN_COUNT) as __, colIndex (colIndex)}
-								<td class="px-4 py-3">
+								<td class="px-4 py-3.5">
 									<div class="h-5 w-full max-w-24 animate-pulse rounded bg-muted"></div>
 								</td>
 							{/each}
@@ -350,6 +387,7 @@
 					<tr>
 						<td colspan={TABLE_COLUMN_COUNT} class="p-0">
 							<Card class="m-4 border-destructive/50 py-12 text-center">
+								<AlertCircle class="mx-auto mb-3 h-6 w-6 text-destructive" aria-hidden="true" />
 								<p class="mb-4 text-destructive">{data.translations.common.error.generic}</p>
 								<Button type="button" variant="outline" onclick={retry}>
 									{data.translations.common.retry}
@@ -361,15 +399,16 @@
 					<tr>
 						<td colspan={TABLE_COLUMN_COUNT} class="p-0">
 							<Card class="m-4 py-12 text-center text-muted-foreground">
+								<Inbox class="mx-auto mb-3 h-6 w-6" aria-hidden="true" />
 								{data.translations.dashboard.items.empty}
 							</Card>
 						</td>
 					</tr>
 				{:else}
 					{#each rows as row (row.id)}
-						<tr class="border-t border-border">
-							<td class="px-4 py-3 font-medium text-foreground">{row.name}</td>
-							<td class="px-4 py-3">
+						<tr class="border-t border-border transition-colors hover:bg-muted/30">
+							<td class="px-4 py-3.5 font-medium text-foreground">{row.name}</td>
+							<td class="px-4 py-3.5">
 								<EditableStatusCell
 									item={row}
 									pending={pendingRowIds.has(row.id)}
@@ -381,12 +420,17 @@
 									onError={showEditError}
 								/>
 							</td>
-							<td class="px-4 py-3 text-muted-foreground">{formatChannelLabel(row.channel)}</td>
-							<td class="px-4 py-3 text-muted-foreground">{row.owner.name}</td>
-							<td class="px-4 py-3">{formatCurrency(row.budget)}</td>
-							<td class="px-4 py-3">{formatCurrency(row.spent)}</td>
-							<td class="px-4 py-3">{formatCtr(row.ctr)}</td>
-							<td class="px-4 py-3 text-muted-foreground">{formatDate(row.updatedAt)}</td>
+							<td class="px-4 py-3.5 text-muted-foreground">{formatChannelLabel(row.channel)}</td>
+							<td class="px-4 py-3.5">
+								<div class="flex items-center gap-2">
+									<AvatarChip name={row.owner.name} />
+									<span class="text-muted-foreground">{row.owner.name}</span>
+								</div>
+							</td>
+							<td class="px-4 py-3.5">{formatCurrency(row.budget)}</td>
+							<td class="px-4 py-3.5">{formatCurrency(row.spent)}</td>
+							<td class="px-4 py-3.5">{formatCtr(row.ctr)}</td>
+							<td class="px-4 py-3.5 text-muted-foreground">{formatDate(row.updatedAt)}</td>
 						</tr>
 					{/each}
 				{/if}

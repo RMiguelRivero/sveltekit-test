@@ -2,21 +2,23 @@
 	import type { ButtonSize, ButtonVariant } from './types';
 
 	const baseClasses =
-		'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50';
+		'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]';
 
 	const variantClasses: Record<ButtonVariant, string> = {
-		primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+		primary: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md',
 		secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
 		outline:
-			'border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground',
+			'border border-border bg-background text-foreground hover:border-primary/40 hover:bg-accent hover:text-accent-foreground',
 		ghost: 'text-foreground hover:bg-accent hover:text-accent-foreground',
-		destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+		destructive:
+			'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 hover:shadow-md',
 	};
 
 	const sizeClasses: Record<ButtonSize, string> = {
 		sm: 'h-8 px-3 text-sm',
 		md: 'h-10 px-4 text-sm',
 		lg: 'h-12 px-6 text-base',
+		icon: 'h-10 w-10 p-0',
 	};
 </script>
 
@@ -32,6 +34,7 @@
 		target?: HTMLAnchorAttributes['target'];
 		rel?: HTMLAnchorAttributes['rel'];
 		type?: HTMLButtonAttributes['type'];
+		title?: HTMLButtonAttributes['title'];
 		disabled?: boolean;
 		class?: string;
 		children?: Snippet;
@@ -44,6 +47,7 @@
 		target,
 		rel,
 		type = 'button',
+		title,
 		disabled,
 		class: className,
 		children,
@@ -61,6 +65,8 @@
 		{rel}
 		class={classes}
 		aria-disabled={disabled ? 'true' : undefined}
+		aria-label={title}
+		{title}
 		tabindex={disabled ? -1 : undefined}
 		{...rest as Record<string, unknown>}
 	>

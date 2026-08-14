@@ -14,7 +14,7 @@
 <select
 	{id}
 	class={cn(
-		'block w-full rounded-md border-border bg-background text-sm text-foreground focus:border-ring focus:ring-ring',
+		'block w-full rounded-md border-border bg-background text-sm text-foreground transition-colors focus:border-ring focus:ring-ring',
 		className,
 	)}
 	{...rest}

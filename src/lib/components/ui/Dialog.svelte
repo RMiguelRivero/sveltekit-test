@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import X from '@lucide/svelte/icons/x';
 	import { cn } from 'classname';
 	import Button from './Button.svelte';
 	import Heading from './Heading.svelte';
@@ -118,14 +119,8 @@
 	>
 		<div class="flex items-start justify-between gap-4">
 			<Heading level={2} id={titleId} class="text-lg">{title}</Heading>
-			<Button
-				variant="ghost"
-				size="sm"
-				class="h-8 w-8 shrink-0 p-0"
-				aria-label="Close"
-				onclick={close}
-			>
-				✕
+			<Button variant="ghost" size="icon" class="shrink-0" aria-label="Close" onclick={close}>
+				<X class="h-4 w-4" aria-hidden="true" />
 			</Button>
 		</div>
 		{#if description}

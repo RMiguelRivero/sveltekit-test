@@ -1,49 +1,24 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { capitalize } from '$lib/utils/capitalize';
-	import { toPathname } from '$lib/utils/toPathname';
+	import DashboardSidebar from '$lib/components/dashboard/DashboardSidebar.svelte';
+	import DashboardTopbar from '$lib/components/dashboard/DashboardTopbar.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
-
-	const dashboardHref = $derived(toPathname(`/${data.locale}/dashboard`));
-	const itemsHref = $derived(toPathname(`/${data.locale}/dashboard/items`));
 </script>
 
-<div class="border-b border-border bg-card text-card-foreground">
-	<div class="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-3">
-		<nav aria-label="Dashboard" class="flex items-center gap-4">
-			<a
-				href={resolve(dashboardHref)}
-				aria-current={page.url.pathname === dashboardHref ? 'page' : undefined}
-				class="rounded-sm font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-			>
-				{data.translations.dashboard.title}
-			</a>
-			<a
-				href={resolve(itemsHref)}
-				aria-current={page.url.pathname.startsWith(itemsHref) ? 'page' : undefined}
-				class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-			>
-				{data.translations.dashboard.items.title}
-			</a>
-		</nav>
+<a
+	href="#dashboard-main-content"
+	class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-sm focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+>
+	Skip to content
+</a>
 
-		<div class="flex items-center gap-3">
-			<span class="flex items-center gap-2 text-sm text-muted-foreground">
-				{data.user.name}
-				<Badge variant="outline">{capitalize(data.user.role)}</Badge>
-			</span>
-			<form method="POST" action={resolve(toPathname(`/${data.locale}/logout`))}>
-				<Button type="submit" variant="outline" size="sm">
-					{data.translations.nav.logout}
-				</Button>
-			</form>
-		</div>
+<div class="flex h-screen overflow-hidden bg-background">
+	<DashboardSidebar locale={data.locale} translations={data.translations} user={data.user} />
+	<div class="flex min-w-0 flex-1 flex-col">
+		<DashboardTopbar locale={data.locale} translations={data.translations} user={data.user} />
+		<main id="dashboard-main-content" class="min-w-0 flex-1 overflow-y-auto">
+			{@render children()}
+		</main>
 	</div>
 </div>
-
-{@render children()}

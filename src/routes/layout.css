@@ -10,7 +10,7 @@
 		'Open Sans', 'Helvetica Neue', sans-serif;
 	--font-mono: 'Fira Mono', monospace;
 
-	--radius: 0.625rem;
+	--radius: 0.75rem;
 
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
@@ -21,16 +21,18 @@
 	--popover: oklch(1 0 0);
 	--popover-foreground: oklch(0.145 0 0);
 
-	--primary: oklch(0.55 0.18 260);
-	--primary-foreground: oklch(0.98 0 0);
+	--primary: oklch(0.546 0.245 293);
+	--primary-foreground: oklch(0.99 0 0);
+	--primary-gradient-from: oklch(0.546 0.245 293);
+	--primary-gradient-to: oklch(0.55 0.23 322);
 
-	--secondary: oklch(0.96 0.01 260);
+	--secondary: oklch(0.96 0.02 293);
 	--secondary-foreground: oklch(0.205 0 0);
 
-	--muted: oklch(0.96 0.01 260);
-	--muted-foreground: oklch(0.45 0.02 260);
+	--muted: oklch(0.965 0.012 293);
+	--muted-foreground: oklch(0.48 0.03 293);
 
-	--accent: oklch(0.94 0.03 260);
+	--accent: oklch(0.93 0.05 293);
 	--accent-foreground: oklch(0.205 0 0);
 
 	--destructive: oklch(0.577 0.245 27.325);
@@ -42,9 +44,14 @@
 	--warning: oklch(0.75 0.16 80);
 	--warning-foreground: oklch(0.205 0 0);
 
-	--border: oklch(0.9 0.01 260);
-	--input: oklch(0.9 0.01 260);
-	--ring: oklch(0.55 0.18 260);
+	--border: oklch(0.9 0.015 293);
+	--input: oklch(0.9 0.015 293);
+	--ring: oklch(0.546 0.245 293);
+
+	--sidebar: oklch(0.985 0.006 293);
+	--sidebar-foreground: oklch(0.22 0.02 293);
+	--sidebar-border: oklch(0.9 0.015 293);
+	--sidebar-accent: var(--accent);
 
 	font-family: var(--font-sans);
 	color: var(--foreground);
@@ -60,16 +67,18 @@
 	--popover: oklch(0.205 0 0);
 	--popover-foreground: oklch(0.98 0 0);
 
-	--primary: oklch(0.7 0.16 260);
+	--primary: oklch(0.685 0.21 293);
 	--primary-foreground: oklch(0.145 0 0);
+	--primary-gradient-from: oklch(0.55 0.23 293);
+	--primary-gradient-to: oklch(0.5 0.22 322);
 
-	--secondary: oklch(0.269 0.005 260);
+	--secondary: oklch(0.27 0.02 293);
 	--secondary-foreground: oklch(0.98 0 0);
 
-	--muted: oklch(0.269 0.005 260);
-	--muted-foreground: oklch(0.708 0.01 260);
+	--muted: oklch(0.27 0.02 293);
+	--muted-foreground: oklch(0.72 0.02 293);
 
-	--accent: oklch(0.32 0.03 260);
+	--accent: oklch(0.34 0.06 293);
 	--accent-foreground: oklch(0.98 0 0);
 
 	--destructive: oklch(0.65 0.22 27.325);
@@ -83,7 +92,12 @@
 
 	--border: oklch(1 0 0 / 12%);
 	--input: oklch(1 0 0 / 18%);
-	--ring: oklch(0.7 0.16 260);
+	--ring: oklch(0.685 0.21 293);
+
+	--sidebar: oklch(0.18 0.02 293);
+	--sidebar-foreground: oklch(0.96 0.01 293);
+	--sidebar-border: oklch(1 0 0 / 12%);
+	--sidebar-accent: oklch(0.3 0.05 293);
 }
 
 @theme inline {
@@ -98,6 +112,8 @@
 
 	--color-primary: var(--primary);
 	--color-primary-foreground: var(--primary-foreground);
+	--color-primary-gradient-from: var(--primary-gradient-from);
+	--color-primary-gradient-to: var(--primary-gradient-to);
 
 	--color-secondary: var(--secondary);
 	--color-secondary-foreground: var(--secondary-foreground);
@@ -121,6 +137,11 @@
 	--color-input: var(--input);
 	--color-ring: var(--ring);
 
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-accent: var(--sidebar-accent);
+
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
@@ -130,56 +151,62 @@
 	--font-family-mono: var(--font-mono);
 }
 
-h1,
-h2,
-p {
-	font-weight: 400;
-}
+@layer base {
+	body {
+		background-color: var(--color-background);
+	}
 
-p {
-	line-height: 1.5;
-}
+	h1,
+	h2,
+	p {
+		font-weight: 400;
+	}
 
-a {
-	color: var(--color-primary);
-	text-decoration: none;
-}
+	p {
+		line-height: 1.5;
+	}
 
-a:hover {
-	text-decoration: underline;
-}
+	a {
+		color: var(--color-primary);
+		text-decoration: none;
+	}
 
-h1 {
-	font-size: 2rem;
-	text-align: center;
-}
+	a:hover {
+		text-decoration: underline;
+	}
 
-h2 {
-	font-size: 1rem;
-}
-
-pre {
-	font-size: 16px;
-	font-family: var(--font-mono);
-	background-color: var(--color-muted);
-	border-radius: 3px;
-	padding: 0.5em;
-	overflow-x: auto;
-	color: var(--color-foreground);
-}
-
-input,
-button {
-	font-size: inherit;
-	font-family: inherit;
-}
-
-button:focus:not(:focus-visible) {
-	outline: none;
-}
-
-@media (min-width: 720px) {
 	h1 {
-		font-size: 2.4rem;
+		font-size: 2rem;
+		text-align: center;
+	}
+
+	h2 {
+		font-size: 1rem;
+	}
+
+	pre {
+		font-size: 16px;
+		font-family: var(--font-mono);
+		background-color: var(--color-muted);
+		border-radius: 3px;
+		padding: 0.5em;
+		overflow-x: auto;
+		color: var(--color-foreground);
+	}
+
+	input,
+	button {
+		font-size: inherit;
+		font-family: inherit;
+	}
+
+	button:focus:not(:focus-visible) {
+		outline: none;
+	}
+
+	@media (min-width: 720px) {
+		h1 {
+			font-size: 2.4rem;
+		}
 	}
 }

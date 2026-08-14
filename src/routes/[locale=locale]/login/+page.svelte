@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { z } from 'zod';
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
+	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { loginPayloadSchema } from '$lib/schemas';
+	import { toPathname } from '$lib/utils/toPathname';
 	import type { ActionData, PageData } from './$types';
 
 	type ClientErrors = { email?: string; password?: string };
@@ -43,7 +46,14 @@
 </svelte:head>
 
 <Container size="sm" class="py-8">
-	<Card class="mx-auto max-w-sm p-6">
+	<a
+		href={resolve(toPathname(`/${data.locale}`))}
+		class="mx-auto mb-6 block w-fit rounded-sm text-center text-lg font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+	>
+		Demo Co.
+	</a>
+
+	<Card class="mx-auto max-w-sm p-6 shadow-md">
 		<Heading level={1} class="mb-6">{data.translations.login.title}</Heading>
 
 		<form
@@ -60,7 +70,10 @@
 			class="flex flex-col gap-4"
 		>
 			{#if form?.message}
-				<p role="alert" class="text-sm text-destructive">{form.message}</p>
+				<p role="alert" class="flex items-center gap-2 text-sm text-destructive">
+					<AlertCircle class="h-4 w-4 shrink-0" aria-hidden="true" />
+					{form.message}
+				</p>
 			{/if}
 
 			<div class="flex flex-col gap-1.5">

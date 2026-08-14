@@ -1,6 +1,6 @@
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
 
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 export type BadgeVariant = 'default' | 'success' | 'warning' | 'destructive' | 'outline';
 

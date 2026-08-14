@@ -17,9 +17,15 @@
 </svelte:head>
 
 <Container size="md" class="py-8">
-	<Heading level={1} class="mb-6">
-		{data.translations.dashboard.welcome.replace('{name}', data.user.name)}
-	</Heading>
+	<div
+		class="mb-8 rounded-xl p-8 shadow-md"
+		style="background: linear-gradient(135deg, var(--primary-gradient-from), var(--primary-gradient-to))"
+	>
+		<Heading level={1} class="text-white">
+			{data.translations.dashboard.welcome.replace('{name}', data.user.name)}
+		</Heading>
+		<p class="mt-2 text-white/80">{data.translations.dashboard.meta.description}</p>
+	</div>
 
 	<Card class="p-6">
 		<p class="mb-4 text-muted-foreground">{data.translations.dashboard.items.title}</p>
