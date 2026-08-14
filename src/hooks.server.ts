@@ -1,5 +1,5 @@
 import { LOCALES_SET } from '$lib/i18n/constants';
-import { getValidatedUsers } from '$lib/server/api';
+import { getUsers } from '$lib/server/api';
 import { SESSION_COOKIE_NAME } from '$lib/server/auth/auth.constants';
 import { verifySessionCookieValue } from '$lib/server/auth/session';
 import type { Handle } from '@sveltejs/kit';
@@ -27,7 +27,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return new Response('Not found', { status: 404 });
 	}
 
-	event.locals.user = resolveSessionUser(event.cookies.get(SESSION_COOKIE_NAME));
+	event.locals.user = await resolveSessionUser(event.cookies.get(SESSION_COOKIE_NAME));
 	if (!event.locals.user && event.cookies.get(SESSION_COOKIE_NAME)) {
 		event.cookies.delete(SESSION_COOKIE_NAME, { path: '/' });
 	}
@@ -35,7 +35,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-function resolveSessionUser(cookieValue: string | undefined): App.Locals['user'] {
+async function resolveSessionUser(cookieValue: string | undefined): Promise<App.Locals['user']> {
 	if (!cookieValue) {
 		return null;
 	}
@@ -43,7 +43,7 @@ function resolveSessionUser(cookieValue: string | undefined): App.Locals['user']
 	if (!session) {
 		return null;
 	}
-	const user = getValidatedUsers().find((candidate) => candidate.id === session.id);
+	const user = (await getUsers()).find((candidate) => candidate.id === session.id);
 	if (!user) {
 		return null;
 	}

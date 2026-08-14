@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getPostBySlug } from '$lib/server/api';
+import { getPost } from '$lib/server/api';
 
 // A single slug's content doesn't depend on query params, so this route stays
 // prerender-friendly per-slug — but ISR (rather than pure `prerender = true`) lets
@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	const slug = params.slug;
 	let post;
 	try {
-		post = getPostBySlug(slug);
+		post = await getPost(slug);
 	} catch (_err) {
 		throw error(500, { message: 'Internal server error' });
 	}

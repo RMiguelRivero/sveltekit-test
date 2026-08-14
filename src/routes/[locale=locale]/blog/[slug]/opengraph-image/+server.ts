@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { ImageResponse } from '@vercel/og';
 import type { RequestHandler } from './$types';
-import { getPostBySlug } from '$lib/server/api';
+import { getPost } from '$lib/server/api';
 import { translations, type Locale } from '$lib/i18n/constants';
 import { SITE_NAME } from '$lib/components/seo.constants';
 
@@ -96,7 +96,7 @@ function buildOgImageElement(
 }
 
 export const GET: RequestHandler = async ({ params }) => {
-	const post = getPostBySlug(params.slug);
+	const post = await getPost(params.slug);
 	if (!post) {
 		return new Response('Not found', { status: 404 });
 	}

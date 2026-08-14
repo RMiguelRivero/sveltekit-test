@@ -1,5 +1,5 @@
 import { LOCALES, type Locale } from '$lib/i18n/constants';
-import { getValidatedPosts } from '$lib/server/api';
+import { getPosts } from '$lib/server/api';
 import type { RequestHandler } from './$types';
 
 export const prerender = true;
@@ -25,14 +25,14 @@ function buildUrlEntry(origin: string, locale: Locale, path: string): string {
 // Paths are locale-agnostic suffixes (prefixed with a locale segment per <url> entry
 // below). `/search` isn't included: it has no distinct indexable content of its own —
 // the blog list already covers tag filtering — and stays out unless that changes.
-function getIndexablePaths(): string[] {
-	const postPaths = getValidatedPosts().map((post) => `/blog/${post.slug}`);
+async function getIndexablePaths(): Promise<string[]> {
+	const postPaths = (await getPosts()).map((post) => `/blog/${post.slug}`);
 
 	return ['', '/blog', ...postPaths];
 }
 
-export const GET: RequestHandler = ({ url }) => {
-	const paths = getIndexablePaths();
+export const GET: RequestHandler = async ({ url }) => {
+	const paths = await getIndexablePaths();
 	const urls = paths.flatMap((path) =>
 		LOCALES.map((locale) => buildUrlEntry(url.origin, locale, path)),
 	);

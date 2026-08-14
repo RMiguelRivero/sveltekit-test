@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getValidatedPosts } from '$lib/server/api';
+import { getPosts } from '$lib/server/api';
 import { loadPosts } from '$lib/server/posts';
 
 // This route reads page/tags/sort from the query string and returns a different
@@ -37,7 +37,7 @@ export const load: PageServerLoad = async ({ url, params }) => {
 	const sort = (searchParams.get('sort') as 'date-desc' | 'date-asc') || 'date-desc';
 
 	try {
-		const posts = getValidatedPosts();
+		const posts = await getPosts();
 
 		const paginatedData = loadPosts({
 			allPosts: posts,

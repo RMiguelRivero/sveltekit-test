@@ -1,12 +1,8 @@
 import { z } from 'zod';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import {
-	getItemsStore,
-	queryItems,
-	updateItemStatus,
-	type PaginatedItems,
-} from '$lib/server/items';
+import { queryItems, type PaginatedItems } from '$lib/server/items';
+import { getItems, updateItem, SIMULATED_FAILURE_ITEM_ID } from '$lib/server/api';
 import { parseItemsQuery } from '$lib/items-url-state';
 import { itemUpdateSchema } from '$lib/schemas';
 import { canEditItems } from '$lib/permissions';
@@ -35,16 +31,18 @@ async function fetchItemRows(items: PaginatedItems['items']): Promise<PaginatedI
 	return items;
 }
 
-export const load: PageServerLoad = ({ url }) => {
+export const load: PageServerLoad = async ({ url }) => {
 	const query = parseItemsQuery(url.searchParams);
 
-	// The filter/sort/paginate pass itself is cheap (in-memory array ops over the mock
-	// set), so pagination chrome (total/page/totalPages) resolves synchronously and the
-	// skeleton renders with correct counts immediately. Only the row payload is wrapped
-	// in the artificially delayed promise, since that's the part the brief asks to
-	// stream — `itemsPromise` is intentionally not awaited here so SvelteKit streams it
-	// to the client instead of blocking the whole response on it.
-	const result = queryItems(getItemsStore(), query);
+	// The mock "backend" read has no added latency (see $lib/server/api/items), so
+	// awaiting it here doesn't block the response in any perceptible way. The
+	// filter/sort/paginate pass itself is cheap (in-memory array ops over the mock
+	// set), so pagination chrome (total/page/totalPages) resolves before `load`
+	// returns and the skeleton renders with correct counts immediately. Only the row
+	// payload is wrapped in the artificially delayed promise below, since that's the
+	// part the brief asks to stream — `itemsPromise` is intentionally not awaited
+	// here so SvelteKit streams it to the client instead of blocking on it.
+	const result = queryItems(await getItems(), query);
 
 	return {
 		query,
@@ -86,15 +84,20 @@ export const actions: Actions = {
 			return fail(400, { errors: z.flattenError(result.error).fieldErrors });
 		}
 
-		const updateResult = updateItemStatus(result.data.id, result.data.status);
+		// Simulated failure trigger lives here, not in the api layer — see
+		// SIMULATED_FAILURE_ITEM_ID in $lib/server/api/api.constants, a deliberate,
+		// deterministic id (not random flakiness) so the rollback path is reliably
+		// testable in Playwright (step 17).
+		const updateResult = await updateItem(
+			result.data.id,
+			{ status: result.data.status },
+			{ simulateFailure: result.data.id === SIMULATED_FAILURE_ITEM_ID },
+		);
 
 		if (!updateResult.ok) {
 			if (updateResult.reason === 'not_found') {
 				return fail(404, { message: 'Item not found.' });
 			}
-			// Simulated failure path — see SIMULATED_FAILURE_ITEM_ID in $lib/server/items,
-			// a deliberate, deterministic trigger (not random flakiness) so the rollback
-			// path is reliably testable in Playwright (step 17).
 			return fail(500, { message: 'Could not save the update.' });
 		}
 

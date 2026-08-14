@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import { getValidatedUsers } from '$lib/server/api';
+import { getUsers } from '$lib/server/api';
 import { createSessionCookieValue } from '$lib/server/auth/session';
 import { SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from '$lib/server/auth/auth.constants';
 import { loginPayloadSchema } from '$lib/schemas';
@@ -38,7 +38,7 @@ export const actions: Actions = {
 		}
 
 		const { email, password } = result.data;
-		const user = getValidatedUsers().find((candidate) => candidate.email === email);
+		const user = (await getUsers()).find((candidate) => candidate.email === email);
 
 		// Mock auth only: the demo data itself stores plaintext passwords. A real system
 		// would hash+compare (e.g. bcrypt/argon2) and never store plaintext at all.
