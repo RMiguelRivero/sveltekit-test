@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { ImageResponse } from '@vercel/og';
 import type { RequestHandler } from './$types';
 import { getPost } from '$lib/server/api';
-import { translations, type Locale } from '$lib/i18n/constants';
+import type { Translation } from '$lib/i18n/constants';
 import { SITE_NAME } from '$lib/components/seo.constants';
 
 // Edge: this route is stateless, read-only, has no Node-only dependencies, and is
@@ -17,8 +17,8 @@ function h(type: string, props: Record<string, unknown>, children?: unknown): Re
 	return { type, key: null, props: { ...props, children } } as unknown as ReactElement;
 }
 
-function readingTimeLabel(locale: Locale, minutes: number): string {
-	return translations[locale].blog.readingTime.replace('{minutes}', String(minutes));
+function readingTimeLabel(translations: Translation, minutes: number): string {
+	return translations.blog.readingTime.replace('{minutes}', String(minutes));
 }
 
 function buildOgImageElement(
@@ -95,7 +95,7 @@ function buildOgImageElement(
 	);
 }
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, locals }) => {
 	const post = await getPost(params.slug);
 	if (!post) {
 		return new Response('Not found', { status: 404 });
@@ -105,7 +105,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	const element = buildOgImageElement(
 		translation.title,
 		post.author.name,
-		readingTimeLabel(params.locale, post.readingTimeMinutes),
+		readingTimeLabel(locals.translations, post.readingTimeMinutes),
 		post.coverColor,
 	);
 

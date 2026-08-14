@@ -6,7 +6,6 @@ import { getItems, updateItem, SIMULATED_FAILURE_ITEM_ID } from '$lib/server/api
 import { parseItemsQuery } from '$lib/items-url-state';
 import { itemUpdateSchema } from '$lib/schemas';
 import { canEditItems } from '$lib/permissions';
-import { translations } from '$lib/i18n/constants';
 
 // This table gets a mutation endpoint in step 14 (inline edit): a write path wants
 // consistent single-region execution and headroom for a real DB driver later, unlike
@@ -64,7 +63,7 @@ export const load: PageServerLoad = async ({ url }) => {
 // not variations of the same thing: the former needs a retry affordance for the whole
 // table, the latter needs an optimistic rollback + toast scoped to one row.
 export const actions: Actions = {
-	updateStatus: async ({ request, locals, params }) => {
+	updateStatus: async ({ request, locals }) => {
 		// Defense in depth: the dashboard layout guard (step 12) already redirects
 		// anonymous users away before they ever reach this route, but this endpoint
 		// should never trust that alone.
@@ -97,9 +96,9 @@ export const actions: Actions = {
 
 		if (!updateResult.ok) {
 			if (updateResult.reason === 'not_found') {
-				return fail(404, { message: translations[params.locale].common.error.item.notFound });
+				return fail(404, { message: locals.translations.common.error.item.notFound });
 			}
-			return fail(500, { message: translations[params.locale].common.error.item.failedSave });
+			return fail(500, { message: locals.translations.common.error.item.failedSave });
 		}
 
 		return { success: true, item: updateResult.item };

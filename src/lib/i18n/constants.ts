@@ -3,11 +3,12 @@ import deI18n from './de.json';
 import { unflatten, type Unflatten } from './utils';
 
 type DotTranslation = typeof enI18n;
-type Translation = Unflatten<DotTranslation>;
+export type Translation = Unflatten<DotTranslation>;
 
 export const LOCALES = ['en', 'de'] as const;
 export const LOCALES_SET: Set<string> = new Set(LOCALES);
 export type Locale = (typeof LOCALES)[number];
+export const DEFAULT_LOCALE: Locale = 'en';
 
 export const LOCALE_LABELS: Record<Locale, string> = {
 	en: 'English',

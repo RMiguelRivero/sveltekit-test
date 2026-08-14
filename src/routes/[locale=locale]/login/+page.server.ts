@@ -5,7 +5,6 @@ import { getUsers } from '$lib/server/api';
 import { createSessionCookieValue } from '$lib/server/auth/session';
 import { SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from '$lib/server/auth/auth.constants';
 import { loginPayloadSchema } from '$lib/schemas';
-import { translations } from '$lib/i18n/constants';
 import type { Actions, PageServerLoad } from './$types';
 
 // `node:crypto` HMAC signing in the session module needs the Node runtime, not edge.
@@ -29,7 +28,7 @@ export const load: PageServerLoad = ({ locals, params, url }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, params, url }) => {
+	default: async ({ request, cookies, locals, params, url }) => {
 		const formData = Object.fromEntries(await request.formData());
 		const result = loginPayloadSchema.safeParse(formData);
 
@@ -43,7 +42,7 @@ export const actions: Actions = {
 		// Mock auth only: the demo data itself stores plaintext passwords. A real system
 		// would hash+compare (e.g. bcrypt/argon2) and never store plaintext at all.
 		if (!user || user.password !== password) {
-			return fail(401, { message: translations[params.locale].login.error });
+			return fail(401, { message: locals.translations.login.error });
 		}
 
 		const { password: _password, ...sessionUser } = user;

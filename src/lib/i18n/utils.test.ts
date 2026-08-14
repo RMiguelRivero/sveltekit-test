@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { unflatten } from './utils';
+import { isLocale, unflatten } from './utils';
 
 describe('unflatten', () => {
 	it('expands flat keys with dots into nested records', () => {
@@ -28,5 +28,15 @@ describe('unflatten', () => {
 		const result = unflatten(flat);
 
 		expect(result).toEqual(expected);
+	});
+});
+
+describe('isLocale', () => {
+	it('returns true for a known locale', () => {
+		expect(isLocale('en')).toBe(true);
+	});
+
+	it('returns false for an unknown locale', () => {
+		expect(isLocale('fr')).toBe(false);
 	});
 });

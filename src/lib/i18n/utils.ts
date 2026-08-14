@@ -1,3 +1,5 @@
+import { LOCALES_SET, type Locale } from './constants';
+
 // Converts unions of objects into a merged intersection
 type UnionToIntersection<U> = (U extends unknown ? (value: U) => void : never) extends (
 	value: infer I,
@@ -51,4 +53,8 @@ export function unflatten<T extends Record<string, string>>(flatObject: T): Unfl
 	}
 
 	return result as Unflatten<T>;
+}
+
+export function isLocale(value: string): value is Locale {
+	return LOCALES_SET.has(value);
 }

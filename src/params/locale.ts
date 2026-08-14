@@ -1,6 +1,4 @@
 import type { ParamMatcher } from '@sveltejs/kit';
-import { type Locale, LOCALES_SET } from '$lib/i18n/constants';
+import { isLocale } from '$lib/i18n/utils';
 
-export const match = ((param: string): param is Locale => {
-	return LOCALES_SET.has(param);
-}) satisfies ParamMatcher;
+export const match = isLocale satisfies ParamMatcher;

@@ -3,12 +3,14 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 import type { SessionUser } from '$lib/server/auth/types';
+import type { Translation } from '$lib/i18n/constants';
 
 declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
 			user: SessionUser | null;
+			translations: Translation;
 		}
 		// interface PageData {}
 		// interface PageState {}
