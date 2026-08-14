@@ -20,3 +20,16 @@ export {
 export { tagSchema, tagListSchema, type Tag } from './tag';
 
 export { loginPayloadSchema, loginResultSchema, type LoginPayload, type LoginResult } from './auth';
+
+export {
+	webVitalNameSchema,
+	webVitalRatingSchema,
+	webVitalEventSchema,
+	clientErrorEventSchema,
+	beaconEventSchema,
+	type WebVitalName,
+	type WebVitalRating,
+	type WebVitalEvent,
+	type ClientErrorEvent,
+	type BeaconEvent,
+} from './beacon';

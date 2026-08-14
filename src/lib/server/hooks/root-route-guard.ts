@@ -5,7 +5,9 @@ import { LOCALES_SET } from '$lib/i18n/constants';
 // computed per-locale content — post slugs, hreflang alternates — so it can't be a
 // static file the way robots.txt is). Everything else under `static/` bypasses this
 // hook entirely, but a routed endpoint doesn't, so it needs an explicit carve-out.
-const ROOT_ROUTES = new Set(['sitemap.xml']);
+// `api` covers routes like /api/beacon: plain JSON endpoints that aren't user-facing
+// content, so they have no locale prefix to match against.
+const ROOT_ROUTES = new Set(['sitemap.xml', 'api']);
 
 function firstPathSegment(pathname: string): string | undefined {
 	return pathname.replace(/\/$/, '').split('/').filter(Boolean)[0];
