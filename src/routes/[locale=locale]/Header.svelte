@@ -1,31 +1,11 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import Sun from '@lucide/svelte/icons/sun';
-	import Moon from '@lucide/svelte/icons/moon';
-	import { getInitialTheme, setTheme, type Theme } from '$lib/client/theme';
-	import { buildLocaleHref } from '$lib/i18n/buildLocaleHref';
-	import { LOCALES, LOCALE_LABELS, type Locale } from '$lib/i18n/constants';
+	import DisplaySettings from '$lib/components/DisplaySettings.svelte';
 	import { toPathname } from '$lib/utils/toPathname';
 	import type { LayoutData } from './$types';
 
 	let { data }: { data: LayoutData } = $props();
-
-	let theme = $state<Theme>(browser ? getInitialTheme() : 'light');
-
-	function handleLocaleChange(event: Event): void {
-		const target = event.target as HTMLSelectElement;
-		const href = buildLocaleHref(page.url.pathname, page.url.search, target.value as Locale);
-		goto(resolve(toPathname(href)));
-	}
-
-	function toggleTheme(): void {
-		const next: Theme = theme === 'dark' ? 'light' : 'dark';
-		theme = next;
-		setTheme(next);
-	}
 </script>
 
 <header class="border-b border-border bg-card text-card-foreground">
@@ -79,32 +59,6 @@
 			{/if}
 		</nav>
 
-		<div class="flex items-center gap-3">
-			<label class="flex items-center gap-2 text-sm">
-				<span class="sr-only">Locale</span>
-				<select
-					value={data.locale}
-					onchange={handleLocaleChange}
-					class="rounded-md border border-border bg-background px-2 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-				>
-					{#each LOCALES as locale (locale)}
-						<option value={locale}>{LOCALE_LABELS[locale]}</option>
-					{/each}
-				</select>
-			</label>
-
-			<button
-				type="button"
-				onclick={toggleTheme}
-				aria-label="Toggle theme"
-				class="rounded-md border border-border p-1.5 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-			>
-				{#if theme === 'dark'}
-					<Sun class="h-4 w-4" aria-hidden="true" />
-				{:else}
-					<Moon class="h-4 w-4" aria-hidden="true" />
-				{/if}
-			</button>
-		</div>
+		<DisplaySettings />
 	</div>
 </header>

@@ -40,7 +40,7 @@
 		onCloseMobile={closeMobileNav}
 	/>
 	<div class="flex min-w-0 flex-1 flex-col">
-		<DashboardTopbar locale={data.locale} onOpenMobileNav={openMobileNav} />
+		<DashboardTopbar onOpenMobileNav={openMobileNav} />
 		<main id="dashboard-main-content" class="min-w-0 flex-1 overflow-y-auto">
 			{@render children()}
 		</main>
