@@ -350,7 +350,7 @@
 					<tr>
 						<td colspan={TABLE_COLUMN_COUNT} class="p-0">
 							<Card class="m-4 border-destructive/50 py-12 text-center">
-								<p class="mb-4 text-destructive">{data.translations.common.error}</p>
+								<p class="mb-4 text-destructive">{data.translations.common.error.generic}</p>
 								<Button type="button" variant="outline" onclick={retry}>
 									{data.translations.common.retry}
 								</Button>
@@ -374,7 +374,6 @@
 									item={row}
 									pending={pendingRowIds.has(row.id)}
 									editable={canEditStatus}
-									errorMessage={data.translations.common.error}
 									onOptimisticUpdate={(status) => applyRowStatus(row.id, status)}
 									onReconcile={reconcileRow}
 									onRollback={(status) => applyRowStatus(row.id, status)}

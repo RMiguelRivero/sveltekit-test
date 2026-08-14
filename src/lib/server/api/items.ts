@@ -31,11 +31,13 @@ export async function updateItem(
 ): Promise<UpdateItemResult> {
 	const items = getItemsStore();
 	const item = items.find((candidate) => candidate.id === id);
+	await new Promise((resolve) => setTimeout(resolve, 500)); // simulate network latency
 
 	if (!item) {
 		return { ok: false, reason: 'not_found' };
 	}
 	if (options.simulateFailure) {
+		await new Promise((resolve) => setTimeout(resolve, 2000)); // simulate network latency
 		return { ok: false, reason: 'simulated_failure' };
 	}
 

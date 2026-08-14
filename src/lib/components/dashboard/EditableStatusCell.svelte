@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
@@ -11,7 +12,6 @@
 		item: Item;
 		pending: boolean;
 		editable: boolean;
-		errorMessage: string;
 		onOptimisticUpdate: (status: ItemStatus) => void;
 		onReconcile: (item: Item) => void;
 		onRollback: (status: ItemStatus) => void;
@@ -23,7 +23,6 @@
 		item,
 		pending,
 		editable,
-		errorMessage,
 		onOptimisticUpdate,
 		onReconcile,
 		onRollback,
@@ -59,7 +58,11 @@
 			}
 
 			onRollback(previousStatus);
-			onError(errorMessage);
+			const message =
+				result.type === 'failure' && typeof result.data?.message === 'string'
+					? result.data.message
+					: page.data.translations.common.error.generic;
+			onError(message);
 			formElement.querySelector('select')?.focus();
 		};
 	};

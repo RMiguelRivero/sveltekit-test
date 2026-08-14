@@ -34,7 +34,7 @@
 				<Button href={blogHref} variant="outline">{data.translations.blog.backToBlog}</Button>
 			</div>
 		{:else}
-			<Heading level={1} class="mb-4">{data.translations.common.error}</Heading>
+			<Heading level={1} class="mb-4">{data.translations.common.error.generic}</Heading>
 			{#if page.error?.message}
 				<p class="mb-6 text-muted-foreground">{page.error.message}</p>
 			{/if}
