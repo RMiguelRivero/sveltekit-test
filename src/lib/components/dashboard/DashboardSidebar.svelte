@@ -3,10 +3,12 @@
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import ListChecks from '@lucide/svelte/icons/list-checks';
 	import LogOut from '@lucide/svelte/icons/log-out';
+	import X from '@lucide/svelte/icons/x';
 	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { cn } from 'classname';
+	import { fade, fly } from 'svelte/transition';
 	import AvatarChip from '$lib/components/ui/AvatarChip.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { getInitialSidebarCollapsed, setSidebarCollapsed } from '$lib/client/sidebar';
@@ -19,11 +21,14 @@
 		locale: string;
 		translations: Translation;
 		user: { name: string; role: UserRole };
+		mobileOpen: boolean;
+		onCloseMobile: () => void;
 	}
 
-	let { locale, translations, user }: Props = $props();
+	let { locale, translations, user, mobileOpen, onCloseMobile }: Props = $props();
 
 	let collapsed = $state(browser ? getInitialSidebarCollapsed() : false);
+	let mobileDrawerEl: HTMLElement | undefined = $state();
 
 	const dashboardHref = $derived(toPathname(`/${locale}/dashboard`));
 	const itemsHref = $derived(toPathname(`/${locale}/dashboard/items`));
@@ -35,6 +40,12 @@
 		collapsed = !collapsed;
 		setSidebarCollapsed(collapsed);
 	}
+
+	$effect(() => {
+		if (mobileOpen) {
+			mobileDrawerEl?.focus();
+		}
+	});
 </script>
 
 <aside
@@ -126,3 +137,94 @@
 		</div>
 	</div>
 </aside>
+
+{#if mobileOpen}
+	<!-- Decorative scrim: click-to-dismiss is a supplementary mouse/touch affordance, not the
+		keyboard path — Escape (window-level, in the parent layout) and the explicit close
+		button below already give keyboard/AT users full equivalent control. role="presentation"
+		below is what satisfies the a11y linters here (no separate svelte-ignore needed). -->
+	<div
+		class="fixed inset-0 z-40 bg-foreground/50 md:hidden"
+		role="presentation"
+		onclick={onCloseMobile}
+		transition:fade={{ duration: 150 }}
+	></div>
+
+	<div
+		bind:this={mobileDrawerEl}
+		tabindex="-1"
+		role="dialog"
+		aria-modal="true"
+		aria-label="Navigation menu"
+		class="fixed inset-y-0 left-0 z-50 flex w-4/5 flex-col bg-sidebar text-sidebar-foreground shadow-xl outline-none md:hidden"
+		transition:fly={{ x: -320, duration: 200 }}
+	>
+		<div class="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+			<a
+				href={resolve(toPathname(`/${locale}`))}
+				onclick={onCloseMobile}
+				class="rounded-sm text-lg font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+			>
+				Demo Co.
+			</a>
+			<Button
+				variant="ghost"
+				size="icon"
+				onclick={onCloseMobile}
+				aria-label="Close menu"
+				class="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent"
+			>
+				<X class="h-5 w-5" aria-hidden="true" />
+			</Button>
+		</div>
+
+		<nav aria-label="Dashboard" class="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+			<a
+				href={resolve(dashboardHref)}
+				onclick={onCloseMobile}
+				aria-current={page.url.pathname === dashboardHref ? 'page' : undefined}
+				class={cn(
+					navLinkClasses,
+					page.url.pathname === dashboardHref && 'bg-sidebar-accent text-primary',
+				)}
+			>
+				<LayoutDashboard class="h-4 w-4 shrink-0" aria-hidden="true" />
+				{translations.dashboard.title}
+			</a>
+			<a
+				href={resolve(itemsHref)}
+				onclick={onCloseMobile}
+				aria-current={page.url.pathname.startsWith(itemsHref) ? 'page' : undefined}
+				class={cn(
+					navLinkClasses,
+					'ml-6',
+					page.url.pathname.startsWith(itemsHref) && 'bg-sidebar-accent text-primary',
+				)}
+			>
+				<ListChecks class="h-4 w-4 shrink-0" aria-hidden="true" />
+				{translations.dashboard.items.title}
+			</a>
+		</nav>
+
+		<div class="border-t border-sidebar-border p-3">
+			<div class="flex items-center gap-2 rounded-md px-2 py-2">
+				<AvatarChip name={user.name} />
+				<div class="min-w-0 flex-1">
+					<p class="truncate text-sm font-medium">{user.name}</p>
+					<p class="truncate text-xs text-sidebar-foreground/60">{capitalize(user.role)}</p>
+				</div>
+				<form method="POST" action={resolve(toPathname(`/${locale}/logout`))}>
+					<Button
+						type="submit"
+						variant="ghost"
+						size="icon"
+						title={translations.nav.logout}
+						class="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent"
+					>
+						<LogOut class="h-4 w-4" aria-hidden="true" />
+					</Button>
+				</form>
+			</div>
+		</div>
+	</div>
+{/if}

@@ -4,7 +4,25 @@
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
+
+	let mobileNavOpen = $state(false);
+
+	function openMobileNav(): void {
+		mobileNavOpen = true;
+	}
+
+	function closeMobileNav(): void {
+		mobileNavOpen = false;
+	}
+
+	function handleWindowKeydown(event: KeyboardEvent): void {
+		if (event.key === 'Escape' && mobileNavOpen) {
+			closeMobileNav();
+		}
+	}
 </script>
+
+<svelte:window onkeydown={handleWindowKeydown} />
 
 <a
 	href="#dashboard-main-content"
@@ -14,9 +32,15 @@
 </a>
 
 <div class="flex h-screen overflow-hidden bg-background">
-	<DashboardSidebar locale={data.locale} translations={data.translations} user={data.user} />
+	<DashboardSidebar
+		locale={data.locale}
+		translations={data.translations}
+		user={data.user}
+		mobileOpen={mobileNavOpen}
+		onCloseMobile={closeMobileNav}
+	/>
 	<div class="flex min-w-0 flex-1 flex-col">
-		<DashboardTopbar locale={data.locale} translations={data.translations} user={data.user} />
+		<DashboardTopbar locale={data.locale} onOpenMobileNav={openMobileNav} />
 		<main id="dashboard-main-content" class="min-w-0 flex-1 overflow-y-auto">
 			{@render children()}
 		</main>
