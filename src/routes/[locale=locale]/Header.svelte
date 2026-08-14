@@ -25,13 +25,6 @@
 			>
 				{data.translations.nav.blog}
 			</a>
-			<a
-				href={resolve(toPathname(`/${data.locale}/search`))}
-				aria-current={page.url.pathname === `/${data.locale}/search` ? 'page' : undefined}
-				class="rounded-sm text-sm font-medium transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none aria-[current=page]:text-primary"
-			>
-				{data.translations.nav.search}
-			</a>
 			{#if data.user}
 				<a
 					href={resolve(toPathname(`/${data.locale}/dashboard`))}
