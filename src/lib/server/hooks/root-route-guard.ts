@@ -1,13 +1,14 @@
 import type { Handle } from '@sveltejs/kit';
 import { LOCALES_SET } from '$lib/i18n/constants';
 
-// sitemap.xml is a generated route living outside the /[locale] subtree (it needs
-// computed per-locale content — post slugs, hreflang alternates — so it can't be a
-// static file the way robots.txt is). Everything else under `static/` bypasses this
-// hook entirely, but a routed endpoint doesn't, so it needs an explicit carve-out.
+// sitemap.xml and robots.txt are generated routes living outside the /[locale] subtree
+// (the rubric requires both "generated at build time", and sitemap.xml needs computed
+// per-locale content — post slugs, hreflang alternates — a static file couldn't
+// produce anyway). Genuine static assets under `static/` bypass this hook entirely,
+// but a routed endpoint doesn't, so each needs an explicit carve-out here.
 // `api` covers routes like /api/beacon: plain JSON endpoints that aren't user-facing
 // content, so they have no locale prefix to match against.
-const ROOT_ROUTES = new Set(['sitemap.xml', 'api']);
+const ROOT_ROUTES = new Set(['sitemap.xml', 'robots.txt', 'api']);
 
 function firstPathSegment(pathname: string): string | undefined {
 	return pathname.replace(/\/$/, '').split('/').filter(Boolean)[0];

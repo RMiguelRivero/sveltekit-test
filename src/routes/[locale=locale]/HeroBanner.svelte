@@ -17,15 +17,5 @@
 		<div class="mt-8">
 			<Button href={ctaHref} size="lg">{hero.cta}</Button>
 		</div>
-		<img
-			src="/images/hero/hero-banner-light.webp"
-			alt=""
-			class="mx-auto mt-12 w-full max-w-3xl rounded-xl dark:hidden"
-		/>
-		<img
-			src="/images/hero/hero-banner-dark.webp"
-			alt=""
-			class="mx-auto mt-12 hidden w-full max-w-3xl rounded-xl dark:block"
-		/>
 	</Container>
 </section>
