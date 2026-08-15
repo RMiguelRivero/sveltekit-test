@@ -8,6 +8,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { cn } from 'classname';
+	import type { Component } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import AvatarChip from '$lib/components/ui/AvatarChip.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -15,6 +16,7 @@
 	import type { Translation } from '$lib/i18n/constants';
 	import type { UserRole } from '$lib/schemas';
 	import { capitalize } from '$lib/utils/capitalize';
+	import { isPathActive } from '$lib/utils/isPathActive';
 	import { toPathname } from '$lib/utils/toPathname';
 
 	interface Props {
@@ -23,6 +25,14 @@
 		user: { name: string; role: UserRole };
 		mobileOpen: boolean;
 		onCloseMobile: () => void;
+	}
+
+	interface DashboardNavLink {
+		path: `/${string}`;
+		exact: boolean;
+		indent: boolean;
+		label: string;
+		icon: Component;
 	}
 
 	let { locale, translations, user, mobileOpen, onCloseMobile }: Props = $props();
@@ -35,6 +45,23 @@
 
 	const navLinkClasses =
 		'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent';
+
+	const dashboardNavLinks = $derived<DashboardNavLink[]>([
+		{
+			path: dashboardHref,
+			exact: true,
+			indent: false,
+			label: translations.dashboard.title,
+			icon: LayoutDashboard,
+		},
+		{
+			path: itemsHref,
+			exact: false,
+			indent: true,
+			label: translations.dashboard.items.title,
+			icon: ListChecks,
+		},
+	]);
 
 	function toggleCollapsed(): void {
 		collapsed = !collapsed;
@@ -57,7 +84,7 @@
 	<div class="flex h-16 items-center border-b border-sidebar-border px-3">
 		{#if !collapsed}
 			<a
-				href={resolve(toPathname(`/${locale}`))}
+				href={resolve(dashboardHref)}
 				class="truncate rounded-sm px-3 text-lg font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 			>
 				Demo Co.
@@ -82,36 +109,24 @@
 	</div>
 
 	<nav aria-label="Dashboard" class="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-		<a
-			href={resolve(dashboardHref)}
-			aria-current={page.url.pathname === dashboardHref ? 'page' : undefined}
-			title={collapsed ? translations.dashboard.title : undefined}
-			class={cn(
-				navLinkClasses,
-				collapsed && 'justify-center px-0',
-				page.url.pathname === dashboardHref && 'bg-sidebar-accent text-primary',
-			)}
-		>
-			<LayoutDashboard class="h-4 w-4 shrink-0" aria-hidden="true" />
-			{#if !collapsed}
-				{translations.dashboard.title}
-			{/if}
-		</a>
-		<a
-			href={resolve(itemsHref)}
-			aria-current={page.url.pathname.startsWith(itemsHref) ? 'page' : undefined}
-			title={collapsed ? translations.dashboard.items.title : undefined}
-			class={cn(
-				navLinkClasses,
-				collapsed ? 'justify-center px-0' : 'ml-6',
-				page.url.pathname.startsWith(itemsHref) && 'bg-sidebar-accent text-primary',
-			)}
-		>
-			<ListChecks class="h-4 w-4 shrink-0" aria-hidden="true" />
-			{#if !collapsed}
-				{translations.dashboard.items.title}
-			{/if}
-		</a>
+		{#each dashboardNavLinks as link (link.path)}
+			{@const isActive = isPathActive(page.url.pathname, link.path, link.exact)}
+			<a
+				href={resolve(link.path)}
+				aria-current={isActive ? 'page' : undefined}
+				title={collapsed ? link.label : undefined}
+				class={cn(
+					navLinkClasses,
+					collapsed ? 'justify-center px-0' : link.indent && 'ml-6',
+					isActive && 'bg-sidebar-accent text-primary',
+				)}
+			>
+				<link.icon class="h-4 w-4 shrink-0" aria-hidden="true" />
+				{#if !collapsed}
+					{link.label}
+				{/if}
+			</a>
+		{/each}
 	</nav>
 
 	<div class="border-t border-sidebar-border p-3">
@@ -161,7 +176,7 @@
 	>
 		<div class="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
 			<a
-				href={resolve(toPathname(`/${locale}`))}
+				href={resolve(dashboardHref)}
 				onclick={onCloseMobile}
 				class="rounded-sm text-lg font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 			>
@@ -179,31 +194,22 @@
 		</div>
 
 		<nav aria-label="Dashboard" class="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-			<a
-				href={resolve(dashboardHref)}
-				onclick={onCloseMobile}
-				aria-current={page.url.pathname === dashboardHref ? 'page' : undefined}
-				class={cn(
-					navLinkClasses,
-					page.url.pathname === dashboardHref && 'bg-sidebar-accent text-primary',
-				)}
-			>
-				<LayoutDashboard class="h-4 w-4 shrink-0" aria-hidden="true" />
-				{translations.dashboard.title}
-			</a>
-			<a
-				href={resolve(itemsHref)}
-				onclick={onCloseMobile}
-				aria-current={page.url.pathname.startsWith(itemsHref) ? 'page' : undefined}
-				class={cn(
-					navLinkClasses,
-					'ml-6',
-					page.url.pathname.startsWith(itemsHref) && 'bg-sidebar-accent text-primary',
-				)}
-			>
-				<ListChecks class="h-4 w-4 shrink-0" aria-hidden="true" />
-				{translations.dashboard.items.title}
-			</a>
+			{#each dashboardNavLinks as link (link.path)}
+				{@const isActive = isPathActive(page.url.pathname, link.path, link.exact)}
+				<a
+					href={resolve(link.path)}
+					onclick={onCloseMobile}
+					aria-current={isActive ? 'page' : undefined}
+					class={cn(
+						navLinkClasses,
+						link.indent && 'ml-6',
+						isActive && 'bg-sidebar-accent text-primary',
+					)}
+				>
+					<link.icon class="h-4 w-4 shrink-0" aria-hidden="true" />
+					{link.label}
+				</a>
+			{/each}
 		</nav>
 
 		<div class="border-t border-sidebar-border p-3">
