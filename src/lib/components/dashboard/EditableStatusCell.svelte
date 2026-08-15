@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import type { SubmitFunction } from '@sveltejs/kit';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import { itemSchema, itemStatusSchema, type Item, type ItemStatus } from '$lib/schemas';
@@ -91,6 +92,6 @@
 		<Badge variant={STATUS_BADGE_VARIANT[item.status]}>{capitalize(item.status)}</Badge>
 	{/if}
 	{#if pending}
-		<span class="text-xs text-muted-foreground">Saving…</span>
+		<LoaderCircle class="size-4 animate-spin text-muted-foreground" aria-label="Saving…" />
 	{/if}
 </div>
