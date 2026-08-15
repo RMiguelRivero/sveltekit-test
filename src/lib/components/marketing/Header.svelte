@@ -5,7 +5,7 @@
 	import DisplaySettings from '$lib/components/DisplaySettings.svelte';
 	import { isPathActive } from '$lib/utils/isPathActive';
 	import { toPathname } from '$lib/utils/toPathname';
-	import type { LayoutData } from './$types';
+	import type { LayoutData } from '../../../routes/[locale=locale]/$types';
 
 	type NavLink = {
 		href: string;

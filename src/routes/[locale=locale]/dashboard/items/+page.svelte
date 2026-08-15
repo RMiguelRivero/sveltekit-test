@@ -2,6 +2,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { SvelteSet } from 'svelte/reactivity';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
@@ -76,7 +77,7 @@
 	// or filter), which is also when the skeleton should reappear.
 	let rows: Item[] = $state([]);
 	let loadState: 'pending' | 'ready' | 'error' = $state('pending');
-	let pendingRowIds: Set<string> = $state(new Set());
+	let pendingRowIds: SvelteSet<string> = new SvelteSet();
 
 	$effect(() => {
 		const itemsPromise = data.itemsPromise;
@@ -119,13 +120,11 @@
 	}
 
 	function setRowPending(id: string, isPending: boolean): void {
-		const next = new Set(pendingRowIds);
 		if (isPending) {
-			next.add(id);
+			pendingRowIds.add(id);
 		} else {
-			next.delete(id);
+			pendingRowIds.delete(id);
 		}
-		pendingRowIds = next;
 	}
 
 	function showEditError(message: string): void {

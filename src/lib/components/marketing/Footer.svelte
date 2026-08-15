@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LayoutData } from './$types';
+	import type { LayoutData } from '../../../routes/[locale=locale]/$types';
 
 	let { data }: { data: LayoutData } = $props();
 </script>

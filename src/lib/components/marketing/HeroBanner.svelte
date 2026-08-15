@@ -3,7 +3,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
-	import type { PageData } from './$types';
+	import type { PageData } from '../../../routes/[locale=locale]/$types';
 
 	const data = $derived(page.data as PageData);
 	const hero = $derived(data.translations.home.hero);

@@ -7,6 +7,9 @@ import { SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from '$lib/server/auth/
 import { loginPayloadSchema } from '$lib/schemas';
 import type { Actions, PageServerLoad } from './$types';
 
+// Session signing itself uses Web Crypto (see session.ts) so it would run on edge too, but
+// this is a state-changing write path (sets an httpOnly session cookie), so it's pinned to
+// Node for the same consistency/future-DB-headroom reasoning as the dashboard items mutation.
 export const config = { runtime: 'nodejs20.x' };
 
 // Only accept a same-locale, in-app path as a post-login redirect target — anything
