@@ -19,11 +19,13 @@
 		</Heading>
 		<div class="mt-10 grid gap-6 sm:grid-cols-2">
 			{#each quotes as quote (quote.author)}
-				<Card class="p-6">
-					<blockquote class="text-lg">
-						<p>&ldquo;{quote.text}&rdquo;</p>
-						<cite class="mt-4 block text-sm text-muted-foreground not-italic">{quote.author}</cite>
+				<Card class="relative p-6">
+					<blockquote
+						class="text-lg before:absolute before:top-4 before:text-8xl before:text-accent before:content-['“']"
+					>
+						<p class="ml-12 block">{quote.text}</p>
 					</blockquote>
+					<cite class="mt-4 block text-sm text-muted-foreground not-italic">{quote.author}</cite>
 				</Card>
 			{/each}
 		</div>

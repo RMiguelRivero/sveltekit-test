@@ -16,7 +16,7 @@
 	]);
 </script>
 
-<section id="pricing" aria-labelledby="pricing-title" class="py-16">
+<section id="pricing" aria-labelledby="pricing-title" class="bg-accent py-16">
 	<Container>
 		<Heading level={2} id="pricing-title" class="text-center">
 			{data.translations.home.pricing.title}

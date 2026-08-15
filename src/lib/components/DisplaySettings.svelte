@@ -49,7 +49,13 @@
 		</select>
 	</label>
 
-	<Button variant="ghost" size="icon" onclick={toggleTheme} aria-label="Toggle theme">
+	<Button
+		variant="ghost"
+		size="icon"
+		onclick={toggleTheme}
+		aria-label="Toggle theme"
+		class="max-[410px]:hidden"
+	>
 		<Sun class="h-4 w-4 dark:hidden" aria-hidden="true" />
 		<Moon class="hidden h-4 w-4 dark:inline-block" aria-hidden="true" />
 	</Button>

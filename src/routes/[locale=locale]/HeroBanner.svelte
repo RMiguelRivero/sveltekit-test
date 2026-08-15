@@ -10,7 +10,7 @@
 	const ctaHref = $derived(`/${data.locale}/blog`);
 </script>
 
-<section aria-labelledby="hero-title" class="py-16 text-center sm:py-24">
+<section aria-labelledby="hero-title" class=" bg-accent py-16 text-center sm:py-24">
 	<Container size="md">
 		<Heading level={1} id="hero-title">{hero.title}</Heading>
 		<p class="mt-4 text-lg text-muted-foreground">{hero.subtitle}</p>
