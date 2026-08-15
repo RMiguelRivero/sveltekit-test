@@ -36,6 +36,7 @@
 	let { data }: { data: PageData } = $props();
 
 	const canEditStatus = $derived(canEditItems(data.user.role));
+	const locale = $derived(data.locale);
 
 	const STATUS_OPTIONS = itemStatusSchema.options;
 	const CHANNEL_OPTIONS = itemChannelSchema.options;
@@ -43,11 +44,28 @@
 	const TABLE_COLUMN_COUNT = 8;
 	const SEARCH_DEBOUNCE_MS = 300;
 
-	const currencyFormatter = new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD',
-		maximumFractionDigits: 0,
-	});
+	const currencyFormatter = $derived(
+		new Intl.NumberFormat(locale, {
+			style: 'currency',
+			currency: 'USD',
+			maximumFractionDigits: 0,
+		}),
+	);
+
+	const ctrFormatter = $derived(
+		new Intl.NumberFormat(locale, {
+			style: 'percent',
+			maximumFractionDigits: 3,
+			minimumFractionDigits: 3,
+			maximumSignificantDigits: 3,
+		}),
+	);
+
+	const dateFormatter = $derived(
+		new Intl.DateTimeFormat(locale, {
+			dateStyle: 'short',
+		}),
+	);
 
 	let searchInput = $derived(data.query.filters?.q ?? '');
 
@@ -123,11 +141,11 @@
 	}
 
 	function formatCtr(value: number): string {
-		return `${(value * 100).toFixed(1)}%`;
+		return ctrFormatter.format(value);
 	}
 
 	function formatDate(value: string): string {
-		return new Date(value).toLocaleDateString(data.locale);
+		return dateFormatter.format(new Date(value));
 	}
 
 	function queryHref(query: ItemsQuery): `/${string}` {
