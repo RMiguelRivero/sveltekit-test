@@ -331,7 +331,7 @@
 							<p class="font-bold">{data.translations.dashboard.items.column.name}</p>
 							<button
 								type="button"
-								class="inline-flex items-center gap-1 font-medium uppercase"
+								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
 								onclick={() => sortBy('name')}
 							>
 								{@render sortIcon('name')}
@@ -343,7 +343,7 @@
 							<p class="font-bold">{data.translations.dashboard.items.column.status}</p>
 							<button
 								type="button"
-								class="inline-flex items-center gap-1 font-medium uppercase"
+								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
 								onclick={() => sortBy('status')}
 							>
 								{@render sortIcon('status')}
@@ -363,27 +363,32 @@
 							</p>
 							<button
 								type="button"
-								class="inline-flex items-center gap-1 font-medium uppercase"
+								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
 								onclick={() => sortBy('budget')}
 								>{@render sortIcon('budget')}
 							</button>
 						</div>
 					</th>
 					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('spent')}>
-						<button
-							type="button"
-							class="inline-flex items-center gap-1 font-medium uppercase"
-							onclick={() => sortBy('spent')}
-						>
-							{data.translations.dashboard.items.column.spent}{@render sortIcon('spent')}
-						</button>
+						<div class="flex-start flex">
+							<p class="font-bold">
+								{data.translations.dashboard.items.column.spent}
+							</p>
+							<button
+								type="button"
+								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
+								onclick={() => sortBy('spent')}
+							>
+								{@render sortIcon('spent')}
+							</button>
+						</div>
 					</th>
 					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('ctr')}>
 						<div class="flex-start flex">
 							<p class="font-bold">{data.translations.dashboard.items.column.ctr}</p>
 							<button
 								type="button"
-								class="inline-flex items-center gap-1 font-medium uppercase"
+								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
 								onclick={() => sortBy('ctr')}
 							>
 								{@render sortIcon('ctr')}
@@ -395,7 +400,7 @@
 							<p class="font-bold">{data.translations.dashboard.items.column.updated}</p>
 							<button
 								type="button"
-								class="inline-flex items-center gap-1 font-medium uppercase"
+								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
 								onclick={() => sortBy('updatedAt')}
 							>
 								{@render sortIcon('updatedAt')}
