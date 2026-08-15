@@ -50,10 +50,7 @@
 	</label>
 
 	<Button variant="ghost" size="icon" onclick={toggleTheme} aria-label="Toggle theme">
-		{#if theme === 'dark'}
-			<Sun class="h-4 w-4" aria-hidden="true" />
-		{:else}
-			<Moon class="h-4 w-4" aria-hidden="true" />
-		{/if}
+		<Sun class="h-4 w-4 dark:hidden" aria-hidden="true" />
+		<Moon class="hidden h-4 w-4 dark:inline-block" aria-hidden="true" />
 	</Button>
 </div>
