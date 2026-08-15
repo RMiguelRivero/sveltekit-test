@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Footer from './Footer.svelte';
-	import Header from './Header.svelte';
+	import Footer from '$lib/components/marketing/Footer.svelte';
+	import Header from '$lib/components/marketing/Header.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import type { LayoutProps } from './$types';
 

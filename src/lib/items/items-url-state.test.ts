@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildItemsQueryString, parseItemsQuery } from './items-url-state';
-import type { ItemsQuery } from './server/items';
+import type { ItemsQuery } from '../server/items';
 
 function paramsFrom(query: string): URLSearchParams {
 	return new URLSearchParams(query);

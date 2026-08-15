@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Seo from '$lib/components/Seo.svelte';
-	import Features from './Features.svelte';
-	import HeroBanner from './HeroBanner.svelte';
-	import Pricing from './Pricing.svelte';
-	import Testimonials from './Testimonials.svelte';
-	import type { PageData } from './$types';
+	import Features from '$lib/components/marketing/Features.svelte';
+	import HeroBanner from '$lib/components/marketing/HeroBanner.svelte';
+	import Pricing from '$lib/components/marketing/Pricing.svelte';
+	import Testimonials from '$lib/components/marketing/Testimonials.svelte';
 	import { jsonLdScriptTag } from '$lib/utils/jsonLd';
+	import type { PageData } from './$types';
 
 	interface OrganizationJsonLd {
 		'@context': 'https://schema.org';

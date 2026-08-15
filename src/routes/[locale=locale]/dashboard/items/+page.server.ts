@@ -3,7 +3,7 @@ import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { queryItems, type PaginatedItems } from '$lib/server/items';
 import { getItems, updateItem, SIMULATED_FAILURE_ITEM_ID } from '$lib/server/api';
-import { parseItemsQuery } from '$lib/items-url-state';
+import { parseItemsQuery } from '$lib/items/items-url-state';
 import { itemUpdateSchema } from '$lib/schemas';
 import { canEditItems } from '$lib/permissions';
 

@@ -26,7 +26,7 @@
 		type ItemStatus,
 	} from '$lib/schemas';
 	import type { ItemSortColumn, ItemsQuery } from '$lib/server/items';
-	import { buildItemsQueryString } from '$lib/items-url-state';
+	import { buildItemsQueryString } from '$lib/items/items-url-state';
 	import { canEditItems } from '$lib/permissions';
 	import { capitalize } from '$lib/utils/capitalize';
 	import { debounce } from '$lib/utils/debounce';
