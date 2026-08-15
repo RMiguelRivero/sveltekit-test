@@ -1,11 +1,10 @@
 <script lang="ts">
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import HeroBanner from './HeroBanner.svelte';
+	import Pricing from './Pricing.svelte';
 	import type { PageData } from './$types';
 	import { jsonLdScriptTag } from '$lib/utils/jsonLd';
 
@@ -29,16 +28,10 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const ctaHref = $derived(`/${data.locale}/blog`);
 	const features = $derived([
 		data.translations.home.features.item1,
 		data.translations.home.features.item2,
 		data.translations.home.features.item3,
-	]);
-	const pricingTiers = $derived([
-		data.translations.home.pricing.tier1,
-		data.translations.home.pricing.tier2,
-		data.translations.home.pricing.tier3,
 	]);
 	const quotes = $derived([
 		data.translations.home.social.quote1,
@@ -79,30 +72,7 @@
 	</Container>
 </section>
 
-<section id="pricing" aria-labelledby="pricing-title" class="py-16">
-	<Container>
-		<Heading level={2} id="pricing-title" class="text-center">
-			{data.translations.home.pricing.title}
-		</Heading>
-		<div class="mt-10 grid gap-6 sm:grid-cols-3">
-			{#each pricingTiers as tier, index (tier.name)}
-				<Card class="flex flex-col p-6">
-					<div class="flex items-center justify-between gap-2">
-						<Heading level={3}>{tier.name}</Heading>
-						{#if index === 1}
-							<Badge>{data.translations.home.pricing.tier2.badge}</Badge>
-						{/if}
-					</div>
-					<p class="mt-2 text-3xl font-bold">{tier.price}</p>
-					<p class="mt-2 flex-1 text-muted-foreground">{tier.description}</p>
-					<Button href={ctaHref} class="mt-6" variant={index === 1 ? 'primary' : 'outline'}>
-						{tier.cta}
-					</Button>
-				</Card>
-			{/each}
-		</div>
-	</Container>
-</section>
+<Pricing />
 
 <section aria-labelledby="social-title" class="py-16">
 	<Container size="md">
