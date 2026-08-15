@@ -5,6 +5,7 @@
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
 	import Seo from '$lib/components/Seo.svelte';
+	import HeroBanner from './HeroBanner.svelte';
 	import type { PageData } from './$types';
 	import { jsonLdScriptTag } from '$lib/utils/jsonLd';
 
@@ -60,15 +61,7 @@
 	<!-- eslint-enable svelte/no-at-html-tags -->
 </svelte:head>
 
-<section aria-labelledby="hero-title" class="py-16 text-center sm:py-24">
-	<Container size="md">
-		<Heading level={1} id="hero-title">{data.translations.home.hero.title}</Heading>
-		<p class="mt-4 text-lg text-muted-foreground">{data.translations.home.hero.subtitle}</p>
-		<div class="mt-8">
-			<Button href={ctaHref} size="lg">{data.translations.home.hero.cta}</Button>
-		</div>
-	</Container>
-</section>
+<HeroBanner />
 
 <section aria-labelledby="features-title" class="py-16">
 	<Container>
