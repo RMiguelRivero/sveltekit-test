@@ -11,6 +11,7 @@
 	import { buildLocaleHref } from '$lib/i18n/buildLocaleHref';
 	import { LOCALES, LOCALE_LABELS, type Locale } from '$lib/i18n/constants';
 	import { toPathname } from '$lib/utils/toPathname';
+	import Select from './ui/Select.svelte';
 
 	interface Props {
 		class?: string;
@@ -36,7 +37,8 @@
 <div class={cn('flex items-center gap-3', className)}>
 	<label class="flex items-center gap-2 text-sm">
 		<span class="sr-only">Locale</span>
-		<select
+		<Select
+			name="locale"
 			value={page.data.locale}
 			onchange={handleLocaleChange}
 			class="appearance-none rounded-md border border-border bg-background bg-none px-2 py-1 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
@@ -46,7 +48,7 @@
 					>{LOCALE_LABELS[localeOption]}</option
 				>
 			{/each}
-		</select>
+		</Select>
 	</label>
 
 	<Button
