@@ -20,7 +20,9 @@
 	const homeUrl = $derived(`/${data.locale}`);
 	const blogUrl = $derived(`/${data.locale}/blog`);
 	const loginUrl = $derived(`/${data.locale}/login`);
+	const dashboardUrl = $derived(`/${data.locale}/dashboard`);
 	const showSignInButton = $derived(!data.user && page.url.pathname !== loginUrl);
+
 	const navLinks = $derived<NavLink[]>([
 		{
 			href: resolve(toPathname(homeUrl)),
@@ -34,6 +36,16 @@
 			exact: false,
 			label: data.translations.nav.blog,
 		},
+		...(data.user
+			? [
+					{
+						href: resolve(toPathname(dashboardUrl)),
+						matchUrl: dashboardUrl,
+						exact: true,
+						label: data.translations.nav.dashboard,
+					},
+				]
+			: []),
 	]);
 </script>
 
