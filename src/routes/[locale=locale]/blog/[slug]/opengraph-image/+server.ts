@@ -5,10 +5,16 @@ import { getPost } from '$lib/server/api';
 import type { Translation } from '$lib/i18n/constants';
 import { SITE_NAME } from '$lib/components/seo.constants';
 
-// Edge: this route is stateless, read-only, has no Node-only dependencies, and is
-// fetched by social-media crawlers worldwide, so a low-cold-start, globally
-// distributed runtime is a better fit than a single-region Node function.
-export const config = { runtime: 'edge' };
+// Node, not edge: this route is stateless/read-only and edge was the original intent
+// (low cold-start, globally distributed, good fit for crawler traffic), but
+// @vercel/og@1.0.1's edge build unconditionally does
+// `fetch(new URL('./Geist-Regular.ttf', import.meta.url))` for its fallback font — a
+// blob-asset reference Vercel's edge bundler can't resolve outside Next.js's build,
+// which fails deployment ("referencing unsupported modules: vc-blob-asset:...").
+// Its Node build reads the same font via `fs.readFileSync` instead, which works. This
+// also lines up with Vercel's own direction: Edge Functions are "essentially
+// deprecated" platform-wide in favor of Fluid Compute on Node (sveltejs/kit#14253).
+export const config = { runtime: 'nodejs20.x' };
 
 const IMAGE_WIDTH = 1200;
 const IMAGE_HEIGHT = 630;
