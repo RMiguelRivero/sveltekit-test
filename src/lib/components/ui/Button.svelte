@@ -2,7 +2,7 @@
 	import type { ButtonSize, ButtonVariant } from './types';
 
 	const baseClasses =
-		'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]';
+		'inline-flex items-center justify-center gap-2 rounded-md font-medium no-underline transition-all hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]';
 
 	const variantClasses: Record<ButtonVariant, string> = {
 		primary: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md',
