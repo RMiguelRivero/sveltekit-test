@@ -326,35 +326,48 @@
 				class="bg-muted/50 text-left text-xs font-medium tracking-wide text-muted-foreground uppercase"
 			>
 				<tr>
-					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('name')}>
-						<button
-							type="button"
-							class="inline-flex items-center gap-1 font-medium uppercase"
-							onclick={() => sortBy('name')}
-						>
-							{data.translations.dashboard.items.column.name}{@render sortIcon('name')}
-						</button>
+					<th scope="col" class="flex px-4 py-3.5" aria-sort={ariaSort('name')}>
+						<div class="flex-start flex">
+							<p class="font-bold">{data.translations.dashboard.items.column.name}</p>
+							<button
+								type="button"
+								class="inline-flex items-center gap-1 font-medium uppercase"
+								onclick={() => sortBy('name')}
+							>
+								{@render sortIcon('name')}
+							</button>
+						</div>
 					</th>
 					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('status')}>
-						<button
-							type="button"
-							class="inline-flex items-center gap-1 font-medium uppercase"
-							onclick={() => sortBy('status')}
-						>
-							{data.translations.dashboard.items.column.status}{@render sortIcon('status')}
-						</button>
+						<div class="flex-start flex">
+							<p class="font-bold">{data.translations.dashboard.items.column.status}</p>
+							<button
+								type="button"
+								class="inline-flex items-center gap-1 font-medium uppercase"
+								onclick={() => sortBy('status')}
+							>
+								{@render sortIcon('status')}
+							</button>
+						</div>
 					</th>
-					<th scope="col" class="px-4 py-3.5">{data.translations.dashboard.items.column.channel}</th
+					<th scope="col" class="px-4 py-3.5 font-bold">
+						{data.translations.dashboard.items.column.channel}
+					</th>
+					<th scope="col" class="px-4 py-3.5 font-bold"
+						>{data.translations.dashboard.items.column.owner}</th
 					>
-					<th scope="col" class="px-4 py-3.5">{data.translations.dashboard.items.column.owner}</th>
 					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('budget')}>
-						<button
-							type="button"
-							class="inline-flex items-center gap-1 font-medium uppercase"
-							onclick={() => sortBy('budget')}
-						>
-							{data.translations.dashboard.items.column.budget}{@render sortIcon('budget')}
-						</button>
+						<div class="flex-start flex">
+							<p class="font-bold">
+								{data.translations.dashboard.items.column.budget}
+							</p>
+							<button
+								type="button"
+								class="inline-flex items-center gap-1 font-medium uppercase"
+								onclick={() => sortBy('budget')}
+								>{@render sortIcon('budget')}
+							</button>
+						</div>
 					</th>
 					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('spent')}>
 						<button
@@ -366,22 +379,28 @@
 						</button>
 					</th>
 					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('ctr')}>
-						<button
-							type="button"
-							class="inline-flex items-center gap-1 font-medium uppercase"
-							onclick={() => sortBy('ctr')}
-						>
-							{data.translations.dashboard.items.column.ctr}{@render sortIcon('ctr')}
-						</button>
+						<div class="flex-start flex">
+							<p class="font-bold">{data.translations.dashboard.items.column.ctr}</p>
+							<button
+								type="button"
+								class="inline-flex items-center gap-1 font-medium uppercase"
+								onclick={() => sortBy('ctr')}
+							>
+								{@render sortIcon('ctr')}
+							</button>
+						</div>
 					</th>
 					<th scope="col" class="px-4 py-3.5" aria-sort={ariaSort('updatedAt')}>
-						<button
-							type="button"
-							class="inline-flex items-center gap-1 font-medium uppercase"
-							onclick={() => sortBy('updatedAt')}
-						>
-							{data.translations.dashboard.items.column.updated}{@render sortIcon('updatedAt')}
-						</button>
+						<div class="flex-start flex">
+							<p class="font-bold">{data.translations.dashboard.items.column.updated}</p>
+							<button
+								type="button"
+								class="inline-flex items-center gap-1 font-medium uppercase"
+								onclick={() => sortBy('updatedAt')}
+							>
+								{@render sortIcon('updatedAt')}
+							</button>
+						</div>
 					</th>
 				</tr>
 			</thead>
