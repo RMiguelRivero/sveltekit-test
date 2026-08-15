@@ -7,7 +7,7 @@ async function resolveSessionUser(cookieValue: string | undefined): Promise<App.
 	if (!cookieValue) {
 		return null;
 	}
-	const session = verifySessionCookieValue(cookieValue);
+	const session = await verifySessionCookieValue(cookieValue);
 	if (!session) {
 		return null;
 	}

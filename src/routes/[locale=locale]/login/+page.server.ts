@@ -7,7 +7,6 @@ import { SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from '$lib/server/auth/
 import { loginPayloadSchema } from '$lib/schemas';
 import type { Actions, PageServerLoad } from './$types';
 
-// `node:crypto` HMAC signing in the session module needs the Node runtime, not edge.
 export const config = { runtime: 'nodejs20.x' };
 
 // Only accept a same-locale, in-app path as a post-login redirect target — anything
@@ -46,7 +45,8 @@ export const actions: Actions = {
 		}
 
 		const { password: _password, ...sessionUser } = user;
-		cookies.set(SESSION_COOKIE_NAME, createSessionCookieValue(sessionUser), {
+		const sessionCookieValue = await createSessionCookieValue(sessionUser);
+		cookies.set(SESSION_COOKIE_NAME, sessionCookieValue, {
 			httpOnly: true,
 			secure: !dev,
 			sameSite: 'lax',
