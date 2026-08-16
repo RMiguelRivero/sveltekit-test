@@ -17,13 +17,35 @@ npm run dev
 ## Run tests
 
 ```sh
-npm run test    # unit tests (Vitest) — Dialog composite + business logic
+npm run test     # unit tests (Vitest) — Dialog composite + business logic
+npm run test:e2e # Playwright E2E — builds, serves the preview build, runs the suite
 npm run lint     # prettier --check + eslint
 npm run check    # svelte-check
 ```
 
-No Playwright/E2E suite, size-limit budgets, Lighthouse CI, or pre-commit hooks are
-set up yet — see **Known limitations** below.
+`test:e2e` needs Chromium installed once via `npx playwright install chromium`.
+
+### E2E flows (Playwright, `e2e/`)
+
+- **Anonymous search → post** (`anonymous-search.spec.ts`): visits `/blog`, types a
+  query into the search box (URL-synced via `q`, debounced), asserts the filtered
+  result list, clicks through to the post, and asserts the detail page renders. Search
+  lives on `/blog` itself rather than a separate `/search` route — see the "why" in
+  `blog/+page.server.ts`.
+- **Authenticated dashboard edit + rollback** (`dashboard-optimistic-edit.spec.ts`):
+  logs in via the real `/login` form, edits a campaign's status on
+  `/dashboard/items` and confirms the optimistic update persists across a reload, then
+  edits the deterministic failure sentinel (`cmp_0001`) and confirms the optimistic
+  update rolls back to its previous value with an error toast once the server rejects
+  it — the single most load-bearing assertion in the suite.
+- **Accessibility** (`a11y.spec.ts`): runs axe against `/dashboard/items` once the
+  streamed rows have resolved, and fails on any `serious`/`critical` violation.
+- **Visual regression** (`visual.spec.ts`): snapshots the landing page hero
+  (`e2e/visual.spec.ts-snapshots/`), a static, animation-free target chosen to keep the
+  baseline stable.
+
+No size-limit budgets, Lighthouse CI, or pre-commit hooks are set up yet — see
+**Known limitations** below.
 
 ## Demo credentials
 
