@@ -1,0 +1,4 @@
+# Runs lint-staged only (fast, staged-files-only). The full svelte-check/tsc/test
+# suite is intentionally reserved for CI (see step 19) rather than run on every
+# local commit, since svelte-check in particular is too slow for a pre-commit hook.
+npx lint-staged
