@@ -2,7 +2,9 @@
 	import type { BadgeVariant } from './types';
 
 	const variantClasses: Record<BadgeVariant, string> = {
-		default: 'bg-primary/15 text-primary',
+		// /15 measured at a 4.46:1 contrast ratio against text-primary — just under the
+		// WCAG AA 4.5:1 minimum for normal text. /10 lightens the tint enough to clear it.
+		default: 'bg-primary/10 text-primary',
 		success: 'bg-success/15 text-success',
 		warning: 'bg-warning/15 text-warning',
 		destructive: 'bg-destructive/15 text-destructive',

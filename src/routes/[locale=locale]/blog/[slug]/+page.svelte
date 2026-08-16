@@ -157,7 +157,7 @@
 		<div class="mb-4 flex flex-col items-center justify-between gap-2 sm:flex-row sm:items-center">
 			<div class="flex items-center gap-2">
 				<div
-					class="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium text-white"
+					class="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium text-black"
 					style:background-color={post.author.avatarColor}
 				>
 					{initials}
