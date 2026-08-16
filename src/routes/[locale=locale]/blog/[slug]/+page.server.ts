@@ -1,14 +1,19 @@
-import type { PageServerLoad } from './$types';
+import type { EntryGenerator, PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getPost } from '$lib/server/api';
+import { getPost, getPosts } from '$lib/server/api';
+import { LOCALES } from '$lib/i18n/constants';
 
-// A single slug's content doesn't depend on query params, so this route stays
-// prerender-friendly per-slug — but ISR (rather than pure `prerender = true`) lets
-// edited/new mock posts show up on revalidation instead of requiring a full rebuild.
-export const prerender = false;
+// 'auto' (not `true`): every known post × locale combo below is baked into a real
+// static file at build time (no function invocation, fastest possible response), but
+// the route stays in the dynamic SSR manifest too — a slug added after the last build
+// still resolves via normal SSR instead of 404ing until the next deploy. Trade-off vs.
+// the previous ISR setup: a post *edited* after being prerendered stays frozen at its
+// build-time content (no revalidation window), so content edits need a rebuild again.
+export const prerender = 'auto';
 
-export const config = {
-	isr: { expiration: 300 },
+export const entries: EntryGenerator = async () => {
+	const posts = await getPosts();
+	return LOCALES.flatMap((locale) => posts.map((post) => ({ locale, slug: post.slug })));
 };
 
 export const load: PageServerLoad = async ({ params, url }) => {
