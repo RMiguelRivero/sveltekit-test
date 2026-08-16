@@ -15,33 +15,41 @@
 	// eslint-disable-next-line svelte/valid-prop-names-in-kit-pages
 	let { data }: { data: PageData } = $props();
 
-	let isNotFound = $derived(page.status === 404);
-	let homeHref = $derived(resolve(toPathname(`/${data.locale}`)));
-	let blogHref = $derived(resolve(toPathname(`/${data.locale}/blog`)));
+	let statusCode = $derived(page.status);
+	let isNotFound = $derived(statusCode === 404);
+	let isAuthenticated = $derived(!!data.user);
+	let primaryHref = $derived(
+		resolve(toPathname(isAuthenticated ? `/${data.locale}/dashboard` : `/${data.locale}`)),
+	);
+	let primaryLabel = $derived(
+		isAuthenticated ? data.translations.nav.dashboard : data.translations.error.backHome,
+	);
 
 	function retry(): void {
 		window.location.reload();
 	}
 </script>
 
-<Container size="md" class="py-16">
-	<Card class="mx-auto max-w-md p-8 text-center">
-		{#if isNotFound}
-			<Heading level={1} class="mb-4">{data.translations.error.notFound.title}</Heading>
-			<p class="mb-6 text-muted-foreground">{data.translations.error.notFound.description}</p>
-			<div class="flex justify-center gap-4">
-				<Button href={homeHref} variant="primary">{data.translations.error.backHome}</Button>
-				<Button href={blogHref} variant="outline">{data.translations.blog.backToBlog}</Button>
-			</div>
-		{:else}
-			<Heading level={1} class="mb-4">{data.translations.common.error.generic}</Heading>
-			{#if page.error?.message}
-				<p class="mb-6 text-muted-foreground">{page.error.message}</p>
+<div class="flex min-h-screen items-center justify-center">
+	<Container size="md">
+		<Card class="mx-auto max-w-md p-8 text-center">
+			<p class="text-9xl">{statusCode}</p>
+			{#if isNotFound}
+				<Heading level={1} class="mb-4">{data.translations.error.notFound.title}</Heading>
+				<p class="mb-6 text-muted-foreground">{data.translations.error.notFound.description}</p>
+				<div class="flex justify-center gap-4">
+					<Button href={primaryHref} variant="primary">{primaryLabel}</Button>
+				</div>
+			{:else}
+				<Heading level={1} class="mb-4">{data.translations.common.error.generic}</Heading>
+				{#if page.error?.message}
+					<p class="mb-6 text-muted-foreground">{page.error.message}</p>
+				{/if}
+				<div class="flex justify-center gap-4">
+					<Button onclick={retry} variant="primary">{data.translations.common.retry}</Button>
+					<Button href={primaryHref} variant="outline">{primaryLabel}</Button>
+				</div>
 			{/if}
-			<div class="flex justify-center gap-4">
-				<Button onclick={retry} variant="primary">{data.translations.common.retry}</Button>
-				<Button href={homeHref} variant="outline">{data.translations.error.backHome}</Button>
-			</div>
-		{/if}
-	</Card>
-</Container>
+		</Card>
+	</Container>
+</div>

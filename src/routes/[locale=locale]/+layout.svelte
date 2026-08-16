@@ -12,9 +12,13 @@
 	// chrome — skip Header/Footer/the max-w-5xl wrapper there instead of nesting
 	// two navs. `<Toast/>` stays mounted here regardless, since it's shared.
 	const isDashboard = $derived(page.url.pathname.startsWith(`/${data.locale}/dashboard`));
+	// `+error.svelte` can't opt out of this layout via the `@` reset syntax (that
+	// only applies to +page/+layout), so detect the error boundary via response
+	// status instead to hide the marketing chrome around it.
+	const isError = $derived(page.status >= 400);
 </script>
 
-{#if isDashboard}
+{#if isDashboard || isError}
 	{@render children()}
 {:else}
 	<a
