@@ -4,8 +4,8 @@ import type { Actions, PageServerLoad } from './$types';
 import { queryItems, type PaginatedItems } from '$lib/server/items';
 import { getItems, updateItem, SIMULATED_FAILURE_ITEM_ID } from '$lib/server/api';
 import { parseItemsQuery } from '$lib/items/items-url-state';
-import { itemUpdateSchema } from '$lib/schemas';
-import { canEditItems } from '$lib/permissions';
+import { itemUpdateSchema, itemEditSchema } from '$lib/schemas';
+import { canEditItems, canEditItemDetails } from '$lib/permissions';
 
 // This table gets a mutation endpoint in step 14 (inline edit): a write path wants
 // consistent single-region execution and headroom for a real DB driver later, unlike
@@ -91,6 +91,46 @@ export const actions: Actions = {
 		const updateResult = await updateItem(
 			result.data.id,
 			{ status: result.data.status },
+			{ simulateFailure: result.data.id === SIMULATED_FAILURE_ITEM_ID },
+		);
+
+		if (!updateResult.ok) {
+			if (updateResult.reason === 'not_found') {
+				return fail(404, { message: locals.translations.common.error.item.notFound });
+			}
+			return fail(500, { message: locals.translations.common.error.item.failedSave });
+		}
+
+		return { success: true, item: updateResult.item };
+	},
+
+	// Admin-only full-detail edit (see $lib/permissions#canEditItemDetails), distinct
+	// from updateStatus above which editors can also reach.
+	updateItem: async ({ request, locals }) => {
+		if (!locals.user) {
+			error(401, 'Unauthorized');
+		}
+		if (!canEditItemDetails(locals.user.role)) {
+			error(403, 'Forbidden');
+		}
+
+		const formData = Object.fromEntries(await request.formData());
+		const result = itemEditSchema.safeParse(formData);
+
+		if (!result.success) {
+			return fail(400, { errors: z.flattenError(result.error).fieldErrors });
+		}
+
+		const updateResult = await updateItem(
+			result.data.id,
+			{
+				name: result.data.name,
+				status: result.data.status,
+				channel: result.data.channel,
+				budget: result.data.budget,
+				spent: result.data.spent,
+				ctr: result.data.ctr,
+			},
 			{ simulateFailure: result.data.id === SIMULATED_FAILURE_ITEM_ID },
 		);
 

@@ -4,7 +4,8 @@ A localized (en/de) marketing site + blog + authenticated dashboard, built for t
 demoing. Covers a token-based design system, an
 accessible Dialog composite built from scratch, SEO/JSON-LD, dynamic OG images, a
 mock-auth login flow with signed session cookies, and a streamed/paginated/sortable
-dashboard table with optimistic inline editing.
+dashboard table with optimistic inline editing and an admin-only full-detail edit
+dialog (animated, responsive down to a mobile bottom sheet).
 
 ## Run locally
 
@@ -61,7 +62,10 @@ Mock accounts, from `static/mocks/users.json` (plaintext passwords — mock auth
 | editor@demo.test | demo1234 | editor |
 | viewer@demo.test | demo1234 | viewer |
 
-`viewer` is read-only on the dashboard items table; `admin`/`editor` can edit item status.
+`viewer` is read-only on the dashboard items table; `admin`/`editor` can edit item
+status inline; `admin` additionally gets a pencil-icon "Edit" column opening a dialog
+to edit a campaign's name, status, channel, budget, spent, and CTR, validated against
+the same item schema and saved with the same optimistic-update/rollback behavior.
 
 ## Deploying
 
@@ -85,7 +89,7 @@ insecure dev default.
 | `/login`                       | SSR                       | **Node**     | State-changing write path (sets an httpOnly session cookie); session signing itself uses Web Crypto so it _would_ run on edge, but pinned to Node for consistency with other write paths and headroom for a future real DB driver.                                                                                                                                                                                                          |
 | `/logout`                      | SSR                       | **Node**     | Cookie delete + redirect; pinned to Node for consistency with the other auth mutations, not a hard technical requirement.                                                                                                                                                                                                                                                                                                                   |
 | `/dashboard/**`                | SSR, never prerendered    | Node default | Authenticated, per-user content; guarded by a layout-server `load` (colocated with the subtree it protects, re-runs for every descendant route for free).                                                                                                                                                                                                                                                                                   |
-| `/dashboard/items`             | Streamed SSR              | **Node**     | Skeleton renders immediately; row data streams in via an unawaited `itemsPromise` from `load`. Write path (`updateStatus` action) wants consistent single-region execution and headroom for a real DB driver later.                                                                                                                                                                                                                         |
+| `/dashboard/items`             | Streamed SSR              | **Node**     | Skeleton renders immediately; row data streams in via an unawaited `itemsPromise` from `load`. Write paths (`updateStatus`, and the admin-only `updateItem` full-detail action) want consistent single-region execution and headroom for a real DB driver later.                                                                                                                                                                            |
 | `/sitemap.xml`, `/robots.txt`  | Prerendered               | —            | Generated at build time, locale-aware.                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ## Known limitations / deliberate cuts

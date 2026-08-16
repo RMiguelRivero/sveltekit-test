@@ -43,7 +43,23 @@ export const itemUpdateSchema = z
 	})
 	.meta({ id: 'itemUpdateSchema' });
 
+// Form values arrive as strings, so numeric fields are coerced then piped through the
+// real itemSchema field validators (e.g. ctr's min(0).max(1) bound) rather than
+// redeclaring them here.
+export const itemEditSchema = z
+	.object({
+		id: z.string().min(1),
+		name: itemSchema.shape.name,
+		status: itemStatusSchema,
+		channel: itemChannelSchema,
+		budget: z.coerce.number().pipe(itemSchema.shape.budget),
+		spent: z.coerce.number().pipe(itemSchema.shape.spent),
+		ctr: z.coerce.number().pipe(itemSchema.shape.ctr),
+	})
+	.meta({ id: 'itemEditSchema' });
+
 export type Item = z.infer<typeof itemSchema>;
 export type ItemStatus = z.infer<typeof itemStatusSchema>;
 export type ItemChannel = z.infer<typeof itemChannelSchema>;
 export type ItemUpdate = z.infer<typeof itemUpdateSchema>;
+export type ItemEdit = z.infer<typeof itemEditSchema>;

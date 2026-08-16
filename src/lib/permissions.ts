@@ -8,3 +8,11 @@ const ITEM_EDITABLE_ROLES: ReadonlySet<UserRole> = new Set(['admin', 'editor']);
 export function canEditItems(role: UserRole): boolean {
 	return ITEM_EDITABLE_ROLES.has(role);
 }
+
+// Distinct from ITEM_EDITABLE_ROLES: editors keep inline status-only edit, but the
+// full-detail edit dialog (name/channel/budget/spent/ctr) is admin-only.
+const ITEM_DETAIL_EDITABLE_ROLES: ReadonlySet<UserRole> = new Set(['admin']);
+
+export function canEditItemDetails(role: UserRole): boolean {
+	return ITEM_DETAIL_EDITABLE_ROLES.has(role);
+}

@@ -18,6 +18,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import EditableStatusCell from '$lib/components/dashboard/EditableStatusCell.svelte';
+	import ItemEditDialog from '$lib/components/dashboard/ItemEditDialog.svelte';
 	import { addToast } from '$lib/components/ui/toasts.svelte';
 	import {
 		itemChannelSchema,
@@ -28,22 +29,25 @@
 	} from '$lib/schemas';
 	import type { ItemSortColumn, ItemsQuery } from '$lib/server/items';
 	import { buildItemsQueryString } from '$lib/items/items-url-state';
-	import { canEditItems } from '$lib/permissions';
+	import { canEditItems, canEditItemDetails } from '$lib/permissions';
 	import { capitalize } from '$lib/utils/capitalize';
 	import { debounce } from '$lib/utils/debounce';
+	import { formatChannelLabel } from '$lib/utils/formatChannelLabel';
 	import { toPathname } from '$lib/utils/toPathname';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	const canEditStatus = $derived(canEditItems(data.user.role));
+	const isAdmin = $derived(canEditItemDetails(data.user.role));
 	const locale = $derived(data.locale);
 
 	const STATUS_OPTIONS = itemStatusSchema.options;
 	const CHANNEL_OPTIONS = itemChannelSchema.options;
 	const SKELETON_ROW_COUNT = 8;
-	const TABLE_COLUMN_COUNT = 8;
 	const SEARCH_DEBOUNCE_MS = 300;
+
+	const TABLE_COLUMN_COUNT = $derived(isAdmin ? 9 : 8);
 
 	const currencyFormatter = $derived(
 		new Intl.NumberFormat(locale, {
@@ -77,7 +81,10 @@
 	// or filter), which is also when the skeleton should reappear.
 	let rows: Item[] = $state([]);
 	let loadState: 'pending' | 'ready' | 'error' = $state('pending');
-	let pendingRowIds: SvelteSet<string> = new SvelteSet();
+	// Kept separate so a status-only save (EditableStatusCell) and a full-detail dialog
+	// save (ItemEditDialog) never show each other's loading state for the same row.
+	let statusPendingRowIds: SvelteSet<string> = new SvelteSet();
+	let detailsPendingRowIds: SvelteSet<string> = new SvelteSet();
 
 	$effect(() => {
 		const itemsPromise = data.itemsPromise;
@@ -105,10 +112,10 @@
 		return rows.findIndex((row) => row.id === id);
 	}
 
-	function applyRowStatus(id: string, status: ItemStatus): void {
+	function applyRowPatch(id: string, patch: Partial<Item>): void {
 		const index = findRowIndex(id);
 		if (index !== -1) {
-			rows[index] = { ...rows[index], status };
+			rows[index] = { ...rows[index], ...patch };
 		}
 	}
 
@@ -119,7 +126,7 @@
 		}
 	}
 
-	function setRowPending(id: string, isPending: boolean): void {
+	function setPending(pendingRowIds: SvelteSet<string>, id: string, isPending: boolean): void {
 		if (isPending) {
 			pendingRowIds.add(id);
 		} else {
@@ -129,10 +136,6 @@
 
 	function showEditError(message: string): void {
 		addToast(message, 'error');
-	}
-
-	function formatChannelLabel(channel: ItemChannel): string {
-		return channel === 'sms' ? 'SMS' : capitalize(channel);
 	}
 
 	function formatCurrency(value: number): string {
@@ -416,6 +419,11 @@
 							</button>
 						</div>
 					</th>
+					{#if isAdmin}
+						<th scope="col" class="relative px-4 py-3.5">
+							<span class="sr-only">{data.translations.dashboard.items.column.edit}</span>
+						</th>
+					{/if}
 				</tr>
 			</thead>
 			<tbody>
@@ -462,12 +470,13 @@
 							<td class="px-4 py-3.5">
 								<EditableStatusCell
 									item={row}
-									pending={pendingRowIds.has(row.id)}
+									pending={statusPendingRowIds.has(row.id)}
 									editable={canEditStatus}
-									onOptimisticUpdate={(status) => applyRowStatus(row.id, status)}
+									onOptimisticUpdate={(status) => applyRowPatch(row.id, { status })}
 									onReconcile={reconcileRow}
-									onRollback={(status) => applyRowStatus(row.id, status)}
-									onPendingChange={(isPending) => setRowPending(row.id, isPending)}
+									onRollback={(status) => applyRowPatch(row.id, { status })}
+									onPendingChange={(isPending) =>
+										setPending(statusPendingRowIds, row.id, isPending)}
 									onError={showEditError}
 								/>
 							</td>
@@ -482,6 +491,20 @@
 							<td class="px-4 py-3.5">{formatCurrency(row.spent)}</td>
 							<td class="px-4 py-3.5">{formatCtr(row.ctr)}</td>
 							<td class="px-4 py-3.5 text-muted-foreground">{formatDate(row.updatedAt)}</td>
+							{#if isAdmin}
+								<td class="px-4 py-3.5">
+									<ItemEditDialog
+										item={row}
+										pending={detailsPendingRowIds.has(row.id)}
+										onOptimisticUpdate={(patch) => applyRowPatch(row.id, patch)}
+										onReconcile={reconcileRow}
+										onRollback={(patch) => applyRowPatch(row.id, patch)}
+										onPendingChange={(isPending) =>
+											setPending(detailsPendingRowIds, row.id, isPending)}
+										onError={showEditError}
+									/>
+								</td>
+							{/if}
 						</tr>
 					{/each}
 				{/if}

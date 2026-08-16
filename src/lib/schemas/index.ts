@@ -11,10 +11,12 @@ export {
 	itemSchema,
 	itemListSchema,
 	itemUpdateSchema,
+	itemEditSchema,
 	type Item,
 	type ItemStatus,
 	type ItemChannel,
 	type ItemUpdate,
+	type ItemEdit,
 } from './item';
 
 export { tagSchema, tagListSchema, type Tag } from './tag';
