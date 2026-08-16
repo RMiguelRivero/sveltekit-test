@@ -7,7 +7,10 @@ export default defineConfig({
 	testDir: 'e2e',
 	fullyParallel: true,
 	retries: process.env.CI ? 2 : 0,
-	reporter: 'list',
+	// HTML report only in CI, where step 19's workflow uploads it as an artifact so a
+	// failing run's evidence is inspectable without re-running locally; `list` alone
+	// locally keeps terminal output quiet and skips writing a report nobody opens.
+	reporter: process.env.CI ? [['html', { open: 'never' }], ['list']] : 'list',
 	use: {
 		baseURL: BASE_URL,
 		trace: 'on-first-retry',

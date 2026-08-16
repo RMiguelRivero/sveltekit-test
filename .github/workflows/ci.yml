@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Lint, typecheck, unit, build, e2e, lighthouse, bundle size
+    runs-on: ubuntu-latest
+    env:
+      # Fixed, non-secret value so HMAC session signing (src/lib/server/auth/session.ts)
+      # works against the CI preview server — this only needs to be set, not private,
+      # since login here is against mock demo data with no real user data at risk.
+      SESSION_SECRET: ci-preview-session-secret-not-for-production-use
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (Prettier + ESLint)
+        run: npm run lint
+
+      - name: Typecheck (svelte-check)
+        run: npm run check
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      # Needed both for Playwright's own e2e run and, indirectly, as the Chromium source
+      # `puppeteer` downloads separately below for Lighthouse CI's own collect + the
+      # dashboard puppeteerScript login (see lighthouse/dashboard-login.cjs).
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests (Playwright)
+        run: npm run test:e2e
+
+      - name: Lighthouse CI — public surface (landing + blog + blog/[slug])
+        run: npm run lighthouse
+
+      - name: Lighthouse CI — dashboard (authenticated)
+        run: npm run lighthouse:dashboard
+
+      - name: Bundle size budget
+        run: npm run size-limit
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload Lighthouse CI reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouseci-reports
+          path: .lighthouseci/
+          retention-days: 14
