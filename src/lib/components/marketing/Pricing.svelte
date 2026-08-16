@@ -1,25 +1,26 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
-	import type { PageData } from '../../../routes/[locale=locale]/$types';
+	import type { Translation } from '$lib/i18n/constants';
 
-	const data = $derived(page.data as PageData);
-	const ctaHref = $derived(`/${data.locale}/blog`);
-	const pricingTiers = $derived([
-		data.translations.home.pricing.tier1,
-		data.translations.home.pricing.tier2,
-		data.translations.home.pricing.tier3,
-	]);
+	let {
+		translations,
+		ctaHref,
+	}: {
+		translations: Translation['home']['pricing'];
+		ctaHref: string;
+	} = $props();
+
+	const pricingTiers = $derived([translations.tier1, translations.tier2, translations.tier3]);
 </script>
 
 <section id="pricing" aria-labelledby="pricing-title" class="bg-accent py-16">
 	<Container>
 		<Heading level={2} id="pricing-title" class="text-center">
-			{data.translations.home.pricing.title}
+			{translations.title}
 		</Heading>
 		<div class="mt-10 grid gap-6 sm:grid-cols-3">
 			{#each pricingTiers as tier, index (tier.name)}

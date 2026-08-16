@@ -1,9 +1,7 @@
 <script lang="ts">
-	import type { LayoutData } from '../../../routes/[locale=locale]/$types';
-
-	let { data }: { data: LayoutData } = $props();
+	let { copy }: { copy: string } = $props();
 </script>
 
 <footer class="border-t border-border py-6 text-center text-sm text-muted-foreground">
-	<p>{data.translations.footer.copy}</p>
+	<p>{copy}</p>
 </footer>

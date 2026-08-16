@@ -44,10 +44,10 @@
 	<!-- eslint-enable svelte/no-at-html-tags -->
 </svelte:head>
 
-<HeroBanner />
+<HeroBanner translations={data.translations.home.hero} ctaHref={`/${data.locale}/blog`} />
 
-<Features />
+<Features translations={data.translations.home.features} />
 
-<Pricing />
+<Pricing translations={data.translations.home.pricing} ctaHref={`/${data.locale}/blog`} />
 
-<Testimonials />
+<Testimonials translations={data.translations.home.social} />

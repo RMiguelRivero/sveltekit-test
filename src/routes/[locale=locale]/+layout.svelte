@@ -24,13 +24,13 @@
 		Skip to content
 	</a>
 
-	<Header {data} />
+	<Header locale={data.locale} isAuthenticated={!!data.user} translations={data.translations.nav} />
 
 	<main id="main-content" class="mx-auto w-full max-w-5xl px-4 py-8">
 		{@render children()}
 	</main>
 
-	<Footer {data} />
+	<Footer copy={data.translations.footer.copy} />
 {/if}
 
 <Toast />

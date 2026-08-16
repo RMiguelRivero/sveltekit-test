@@ -5,7 +5,7 @@
 	import DisplaySettings from '$lib/components/DisplaySettings.svelte';
 	import { isPathActive } from '$lib/utils/isPathActive';
 	import { toPathname } from '$lib/utils/toPathname';
-	import type { LayoutData } from '../../../routes/[locale=locale]/$types';
+	import type { Translation } from '$lib/i18n/constants';
 
 	type NavLink = {
 		href: string;
@@ -16,36 +16,34 @@
 
 	const navLinkClass = 'aria-[current=page]:font-bold aria-[current=page]:text-primary';
 
-	let { data }: { data: LayoutData } = $props();
-	const homeUrl = $derived(`/${data.locale}`);
-	const blogUrl = $derived(`/${data.locale}/blog`);
-	const loginUrl = $derived(`/${data.locale}/login`);
-	const dashboardUrl = $derived(`/${data.locale}/dashboard`);
-	const showSignInButton = $derived(!data.user && page.url.pathname !== loginUrl);
+	let {
+		locale,
+		isAuthenticated,
+		translations,
+	}: {
+		locale: string;
+		isAuthenticated: boolean;
+		translations: Translation['nav'];
+	} = $props();
+
+	const homeUrl = $derived(`/${locale}`);
+	const blogUrl = $derived(`/${locale}/blog`);
+	const loginUrl = $derived(`/${locale}/login`);
+	const showSignInButton = $derived(!isAuthenticated && page.url.pathname !== loginUrl);
 
 	const navLinks = $derived<NavLink[]>([
 		{
 			href: resolve(toPathname(homeUrl)),
 			matchUrl: homeUrl,
 			exact: true,
-			label: data.translations.nav.home,
+			label: translations.home,
 		},
 		{
 			href: resolve(toPathname(blogUrl)),
 			matchUrl: blogUrl,
 			exact: false,
-			label: data.translations.nav.blog,
+			label: translations.blog,
 		},
-		...(data.user
-			? [
-					{
-						href: resolve(toPathname(dashboardUrl)),
-						matchUrl: dashboardUrl,
-						exact: true,
-						label: data.translations.nav.dashboard,
-					},
-				]
-			: []),
 	]);
 </script>
 
@@ -70,7 +68,7 @@
 			<DisplaySettings />
 			{#if showSignInButton}
 				<Button href={resolve(toPathname(loginUrl))} size="sm">
-					{data.translations.nav.login}
+					{translations.login}
 				</Button>
 			{/if}
 		</div>

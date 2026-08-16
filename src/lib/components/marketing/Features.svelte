@@ -1,22 +1,18 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
-	import type { PageData } from '../../../routes/[locale=locale]/$types';
+	import type { Translation } from '$lib/i18n/constants';
 
-	const data = $derived(page.data as PageData);
-	const features = $derived([
-		data.translations.home.features.item1,
-		data.translations.home.features.item2,
-		data.translations.home.features.item3,
-	]);
+	let { translations }: { translations: Translation['home']['features'] } = $props();
+
+	const features = $derived([translations.item1, translations.item2, translations.item3]);
 </script>
 
 <section aria-labelledby="features-title" class="py-16">
 	<Container>
 		<Heading level={2} id="features-title" class="text-center">
-			{data.translations.home.features.title}
+			{translations.title}
 		</Heading>
 		<div class="mt-10 grid gap-6 sm:grid-cols-3">
 			{#each features as feature (feature.title)}
