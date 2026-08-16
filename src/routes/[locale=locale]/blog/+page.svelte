@@ -117,35 +117,37 @@
 <Container size="md" class="py-8">
 	<Heading level={1} class="mb-6">{data.translations.blog.title}</Heading>
 
-	<div class="mb-8 flex flex-row-reverse flex-wrap items-start gap-4">
-		<label class="flex items-center gap-2">
-			<span class="font-medium">Sort:</span>
-			<Select value={data.currentSort} onchange={sortHandler} class="w-48">
-				<option value="date-desc">Newest First</option>
-				<option value="date-asc">Oldest First</option>
-			</Select>
-		</label>
+	<Card class="mb-8 p-4">
+		<div class="flex flex-wrap items-end gap-4">
+			<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="blog-search">
+				{data.translations.search.title}
+				<div class="relative">
+					<SearchIcon
+						class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+						aria-hidden="true"
+					/>
+					<Input
+						id="blog-search"
+						type="search"
+						placeholder={data.translations.search.placeholder}
+						bind:value={searchInput}
+						oninput={searchHandler}
+						class="w-64 pl-9"
+					/>
+				</div>
+			</label>
 
-		<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="blog-search">
-			{data.translations.search.title}
-			<div class="relative">
-				<SearchIcon
-					class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-					aria-hidden="true"
-				/>
-				<Input
-					id="blog-search"
-					type="search"
-					placeholder={data.translations.search.placeholder}
-					bind:value={searchInput}
-					oninput={searchHandler}
-					class="w-64 pl-9"
-				/>
-			</div>
-		</label>
+			<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="blog-sort">
+				Sort
+				<Select id="blog-sort" value={data.currentSort} onchange={sortHandler} class="w-48">
+					<option value="date-desc">Newest First</option>
+					<option value="date-asc">Oldest First</option>
+				</Select>
+			</label>
+		</div>
 
-		<div class="flex flex-col gap-1 text-sm font-medium text-foreground">
-			{data.translations.blog.filterByTags}
+		<div class="mt-4 flex flex-col gap-2 border-t border-border pt-4">
+			<span class="text-sm font-medium text-foreground">{data.translations.blog.filterByTags}</span>
 			<div class="flex flex-wrap gap-2">
 				{#each data.allTags as tag (tag.slug)}
 					<button
@@ -164,7 +166,7 @@
 				{/each}
 			</div>
 		</div>
-	</div>
+	</Card>
 
 	{#if data.currentQuery && data.paginatedPosts.total > 0}
 		<p class="mb-4 text-sm text-muted-foreground">
