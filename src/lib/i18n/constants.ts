@@ -10,6 +10,9 @@ export const LOCALES_SET: Set<string> = new Set(LOCALES);
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
 
+export const LOCALE_COOKIE_NAME = 'locale';
+export const LOCALE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+
 export const LOCALE_LABELS: Record<Locale, string> = {
 	en: 'English',
 	de: 'Deutsch',

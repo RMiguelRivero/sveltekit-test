@@ -1,4 +1,4 @@
-import { LOCALES_SET, type Locale } from './constants';
+import { DEFAULT_LOCALE, LOCALES_SET, type Locale } from './constants';
 
 // Converts unions of objects into a merged intersection
 type UnionToIntersection<U> = (U extends unknown ? (value: U) => void : never) extends (
@@ -57,4 +57,10 @@ export function unflatten<T extends Record<string, string>>(flatObject: T): Unfl
 
 export function isLocale(value: string): value is Locale {
 	return LOCALES_SET.has(value);
+}
+
+// Used to pick a locale for paths outside the `[locale=locale]` subtree (e.g. the
+// root catch-all), where there's no `params.locale` to read from.
+export function resolveFallbackLocale(cookieLocale: string | undefined): Locale {
+	return cookieLocale && isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
 }
