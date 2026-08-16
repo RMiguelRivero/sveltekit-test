@@ -21,7 +21,9 @@ test('editing a campaign status updates optimistically and persists', async ({ p
 	const row = page.getByRole('row').filter({ hasText: NORMAL_ITEM_NAME });
 	await expect(row).toBeVisible();
 
-	const statusSelect = row.locator('select');
+	// Scoped by aria-label, not just `select` — each row also carries the (closed but
+	// DOM-present) edit dialog's status/channel selects, so a bare tag selector is ambiguous.
+	const statusSelect = row.getByLabel(`Status for ${NORMAL_ITEM_NAME}`);
 	await expect(statusSelect).toHaveValue('completed');
 
 	// The optimistic update lands in the DOM before the server round-trip resolves,
@@ -40,7 +42,7 @@ test('editing a campaign status updates optimistically and persists', async ({ p
 	// not just the client's optimistic local state.
 	await page.reload();
 	const reloadedRow = page.getByRole('row').filter({ hasText: NORMAL_ITEM_NAME });
-	await expect(reloadedRow.locator('select')).toHaveValue('active');
+	await expect(reloadedRow.getByLabel(`Status for ${NORMAL_ITEM_NAME}`)).toHaveValue('active');
 });
 
 test('editing the sentinel campaign applies optimistically then rolls back on failure', async ({
@@ -51,7 +53,9 @@ test('editing the sentinel campaign applies optimistically then rolls back on fa
 	const row = page.getByRole('row').filter({ hasText: SENTINEL_ITEM_NAME });
 	await expect(row).toBeVisible();
 
-	const statusSelect = row.locator('select');
+	// Scoped by aria-label, not just `select` — each row also carries the (closed but
+	// DOM-present) edit dialog's status/channel selects, so a bare tag selector is ambiguous.
+	const statusSelect = row.getByLabel(`Status for ${SENTINEL_ITEM_NAME}`);
 	await expect(statusSelect).toHaveValue('completed');
 
 	await statusSelect.selectOption('active');
