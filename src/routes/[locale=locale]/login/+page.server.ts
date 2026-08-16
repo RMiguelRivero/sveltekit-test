@@ -1,10 +1,10 @@
-import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { getUsers } from '$lib/server/api';
 import { createSessionCookieValue } from '$lib/server/auth/session';
 import { SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from '$lib/server/auth/auth.constants';
 import { loginPayloadSchema } from '$lib/schemas';
+import { getLoginFieldErrors } from '$lib/utils/getLoginFieldErrors';
 import type { Actions, PageServerLoad } from './$types';
 
 // Session signing itself uses Web Crypto (see session.ts) so it would run on edge too, but
@@ -35,7 +35,7 @@ export const actions: Actions = {
 		const result = loginPayloadSchema.safeParse(formData);
 
 		if (!result.success) {
-			return fail(400, { errors: z.flattenError(result.error).fieldErrors });
+			return fail(400, { errors: getLoginFieldErrors(result, locals.translations.login.errors) });
 		}
 
 		const { email, password } = result.data;

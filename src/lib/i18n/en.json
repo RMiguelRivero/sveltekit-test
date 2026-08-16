@@ -55,6 +55,8 @@
 	"login.password": "Password",
 	"login.submit": "Sign in",
 	"login.error": "Invalid email or password.",
+	"login.errors.email": "Please enter a valid email address.",
+	"login.errors.password": "Password is required.",
 	"dashboard.title": "Dashboard",
 	"dashboard.meta.title": "Dashboard",
 	"dashboard.meta.description": "Your campaigns at a glance.",

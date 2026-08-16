@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { z } from 'zod';
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import AlertCircle from '@lucide/svelte/icons/alert-circle';
@@ -9,21 +8,19 @@
 	import Heading from '$lib/components/ui/Heading.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { loginPayloadSchema } from '$lib/schemas';
+	import { getLoginFieldErrors, type LoginFieldErrors } from '$lib/utils/getLoginFieldErrors';
 	import { toPathname } from '$lib/utils/toPathname';
 	import type { ActionData, PageData } from './$types';
 
-	type ClientErrors = { email?: string; password?: string };
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	function validate(email: string, password: string): ClientErrors {
+	function validate(email: string, password: string): LoginFieldErrors {
 		const result = loginPayloadSchema.safeParse({ email, password });
 		if (result.success) {
 			return {};
 		}
-		const fieldErrors = z.flattenError(result.error).fieldErrors;
-		return { email: fieldErrors.email?.[0], password: fieldErrors.password?.[0] };
+		return getLoginFieldErrors(result, data.translations.login.errors);
 	}
-
-	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let email = $state('');
 	let password = $state('');
@@ -32,10 +29,10 @@
 
 	let clientErrors = $derived(validate(email, password));
 	let emailError = $derived(
-		(touched.email && clientErrors.email) || form?.errors?.email?.[0] || undefined,
+		(touched.email && clientErrors.email) || form?.errors?.email || undefined,
 	);
 	let passwordError = $derived(
-		(touched.password && clientErrors.password) || form?.errors?.password?.[0] || undefined,
+		(touched.password && clientErrors.password) || form?.errors?.password || undefined,
 	);
 </script>
 

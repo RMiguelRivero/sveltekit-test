@@ -55,6 +55,8 @@
 	"login.password": "Passwort",
 	"login.submit": "Anmelden",
 	"login.error": "Ungültige E-Mail oder Passwort.",
+	"login.errors.email": "Bitte gib eine gültige E-Mail-Adresse ein.",
+	"login.errors.password": "Passwort ist erforderlich.",
 	"dashboard.title": "Dashboard",
 	"dashboard.meta.title": "Dashboard",
 	"dashboard.meta.description": "Deine Kampagnen auf einen Blick.",
