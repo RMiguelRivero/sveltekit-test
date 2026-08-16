@@ -118,7 +118,7 @@
 				class={cn(
 					navLinkClasses,
 					collapsed ? 'justify-center px-0' : link.indent && 'ml-6',
-					isActive && 'bg-sidebar-accent text-primary',
+					isActive && 'bg-sidebar-accent text-accent-foreground',
 				)}
 			>
 				<link.icon class="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -135,7 +135,7 @@
 			{#if !collapsed}
 				<div class="min-w-0 flex-1">
 					<p class="truncate text-sm font-medium">{user.name}</p>
-					<p class="truncate text-xs text-sidebar-foreground/60">{capitalize(user.role)}</p>
+					<p class="truncate text-xs text-sidebar-foreground/70">{capitalize(user.role)}</p>
 				</div>
 			{/if}
 			<form method="POST" action={resolve(toPathname(`/${locale}/logout`))}>
@@ -143,6 +143,7 @@
 					type="submit"
 					variant="ghost"
 					size="icon"
+					aria-label={translations.nav.logout}
 					title={collapsed ? translations.nav.logout : undefined}
 					class="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent"
 				>
@@ -203,7 +204,7 @@
 					class={cn(
 						navLinkClasses,
 						link.indent && 'ml-6',
-						isActive && 'bg-sidebar-accent text-primary',
+						isActive && 'bg-sidebar-accent text-accent-foreground',
 					)}
 				>
 					<link.icon class="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -217,7 +218,7 @@
 				<AvatarChip name={user.name} />
 				<div class="min-w-0 flex-1">
 					<p class="truncate text-sm font-medium">{user.name}</p>
-					<p class="truncate text-xs text-sidebar-foreground/60">{capitalize(user.role)}</p>
+					<p class="truncate text-xs text-sidebar-foreground/70">{capitalize(user.role)}</p>
 				</div>
 				<form method="POST" action={resolve(toPathname(`/${locale}/logout`))}>
 					<Button

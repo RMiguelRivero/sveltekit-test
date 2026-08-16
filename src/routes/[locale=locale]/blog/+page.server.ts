@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getPosts } from '$lib/server/api';
+import { getPosts, getTags } from '$lib/server/api';
 import { loadPosts } from '$lib/server/posts';
 
 // This route reads page/tags/sort from the query string and returns a different
@@ -20,8 +20,10 @@ export const prerender = false;
 // Vercel key the cache per allowed query param combination (instead of per pathname
 // only), so `/blog`, `/blog?tags=engineering`, `/blog?page=2` etc. are each generated
 // once and cached/revalidated independently every 5 minutes, rather than one variant's
-// output leaking into the others. No typed adapter-vercel import yet (adapter lands in
-// step 20) — this plain object is a no-op until then.
+// output leaking into the others. `q` (free-text search) is deliberately left out of
+// this allowlist — its cardinality is unbounded, so caching one ISR variant per unique
+// query string would grow the cache without bound. Requests with `q` bypass the cache
+// and render fresh instead, which is cheap here since it's an in-memory array scan.
 export const config = {
 	isr: { expiration: 300, allowQuery: ['page', 'tags', 'sort'] },
 };
@@ -35,24 +37,29 @@ export const load: PageServerLoad = async ({ url, params }) => {
 	const tagsParam = searchParams.get('tags');
 	const tags = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
 	const sort = (searchParams.get('sort') as 'date-desc' | 'date-asc') || 'date-desc';
+	const q = searchParams.get('q')?.trim() || '';
 
 	try {
-		const posts = await getPosts();
+		const [posts, allTags] = await Promise.all([getPosts(), getTags()]);
 
 		const paginatedData = loadPosts({
 			allPosts: posts,
+			locale,
 			page: Math.max(1, page),
 			tags,
 			sort,
+			q,
 		});
 
 		return {
 			paginatedPosts: paginatedData,
+			allTags,
 			locale,
 			origin: url.origin,
 			currentPage: page,
 			currentTags: tags,
 			currentSort: sort,
+			currentQuery: q,
 		};
 	} catch (_err) {
 		throw error(500, { message: 'Failed to load posts' });

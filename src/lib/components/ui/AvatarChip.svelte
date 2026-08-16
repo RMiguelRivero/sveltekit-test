@@ -15,7 +15,7 @@
 
 <span
 	class={cn(
-		'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary',
+		'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary',
 		className,
 	)}
 	aria-hidden="true"

@@ -64,8 +64,9 @@ function buildPostEntries(posts: Post[]): SitemapEntry[] {
 }
 
 // Paths are locale-agnostic suffixes (prefixed with a locale segment per <url> entry
-// below). `/search` isn't included: it has no distinct indexable content of its own —
-// the blog list already covers tag filtering — and stays out unless that changes.
+// below). There's no separate `/search` entry: search (tag/sort/query filtering) is
+// built into `/blog` itself rather than a distinct route, and `/blog`'s own noindex
+// rule already excludes the filtered/searched/paginated variants from indexing.
 // `/` has no `lastmod` of its own — the landing page isn't post-derived content, and
 // fabricating a date would be worse than the spec's own "optional" default.
 async function getIndexableEntries(): Promise<SitemapEntry[]> {

@@ -3,19 +3,24 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
+	import SearchIcon from '@lucide/svelte/icons/search';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Container from '$lib/components/ui/Container.svelte';
 	import Heading from '$lib/components/ui/Heading.svelte';
+	import Input from '$lib/components/ui/Input.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import type { PageData } from './$types';
+	import { debounce } from '$lib/utils/debounce';
 	import { toPathname } from '$lib/utils/toPathname';
 
 	let { data }: { data: PageData } = $props();
 
-	function buildQueryString(page: number, tags: string[], sort: string): string {
+	const SEARCH_DEBOUNCE_MS = 300;
+
+	function buildQueryString(page: number, tags: string[], sort: string, q: string): string {
 		const params = new SvelteURLSearchParams();
 		if (page > 1) {
 			params.set('page', String(page));
@@ -26,30 +31,37 @@
 		if (sort !== 'date-desc') {
 			params.set('sort', sort);
 		}
+		if (q) {
+			params.set('q', q);
+		}
 		const stringParams = params.toString();
 		return stringParams ? `?${stringParams}` : '';
 	}
 
+	let searchInput = $derived(data.currentQuery);
+
 	const currentQueryString = $derived(
-		buildQueryString(data.currentPage, data.currentTags, data.currentSort),
+		buildQueryString(data.currentPage, data.currentTags, data.currentSort, data.currentQuery),
 	);
 	const previousPageUrl = $derived(
 		toPathname(
-			`${page.url.pathname}${buildQueryString(data.currentPage - 1, data.currentTags, data.currentSort)}`,
+			`${page.url.pathname}${buildQueryString(data.currentPage - 1, data.currentTags, data.currentSort, data.currentQuery)}`,
 		),
 	);
 	const nextPageUrl = $derived(
 		toPathname(
-			`${page.url.pathname}${buildQueryString(data.currentPage + 1, data.currentTags, data.currentSort)}`,
+			`${page.url.pathname}${buildQueryString(data.currentPage + 1, data.currentTags, data.currentSort, data.currentQuery)}`,
 		),
 	);
-	// Filtered/paginated views are thin, duplicate-content variants of the same list —
-	// keep only the canonical, unfiltered first page indexable.
-	const isNoindex = $derived(data.currentTags.length > 0 || data.currentPage > 1);
+	// Filtered/searched/paginated views are thin, duplicate-content variants of the same
+	// list — keep only the canonical, unfiltered first page indexable.
+	const isNoindex = $derived(
+		data.currentTags.length > 0 || data.currentPage > 1 || Boolean(data.currentQuery),
+	);
 
 	function sortHandler(event: Event) {
 		const target = event.target as HTMLSelectElement;
-		const qs = buildQueryString(1, data.currentTags, target.value);
+		const qs = buildQueryString(1, data.currentTags, target.value, data.currentQuery);
 		const url = toPathname(`${page.url.pathname}${qs}`);
 		goto(resolve(url));
 	}
@@ -58,9 +70,21 @@
 		const newTags = data.currentTags.includes(tag)
 			? data.currentTags.filter((t) => t !== tag)
 			: [...data.currentTags, tag];
-		const qs = buildQueryString(1, newTags, data.currentSort);
+		const qs = buildQueryString(1, newTags, data.currentSort, data.currentQuery);
 		const url = `${page.url.pathname}${qs}`;
 		goto(resolve(toPathname(url)));
+	}
+
+	function navigateSearch(value: string) {
+		const qs = buildQueryString(1, data.currentTags, data.currentSort, value.trim());
+		const url = toPathname(`${page.url.pathname}${qs}`);
+		goto(resolve(url));
+	}
+
+	const debouncedNavigateSearch = debounce(navigateSearch, SEARCH_DEBOUNCE_MS);
+
+	function searchHandler(event: Event) {
+		debouncedNavigateSearch((event.target as HTMLInputElement).value);
 	}
 
 	function buildPostUrl(slug: string) {
@@ -69,6 +93,10 @@
 
 	function readingTimeLabel(minutes: number): string {
 		return data.translations.blog.readingTime.replace('{minutes}', String(minutes));
+	}
+
+	function tagLabel(slug: string): string {
+		return data.allTags.find((tag) => tag.slug === slug)?.label[data.locale] ?? slug;
 	}
 </script>
 
@@ -89,7 +117,7 @@
 <Container size="md" class="py-8">
 	<Heading level={1} class="mb-6">{data.translations.blog.title}</Heading>
 
-	<div class="mb-8 flex flex-row-reverse flex-wrap gap-4">
+	<div class="mb-8 flex flex-row-reverse flex-wrap items-start gap-4">
 		<label class="flex items-center gap-2">
 			<span class="font-medium">Sort:</span>
 			<Select value={data.currentSort} onchange={sortHandler} class="w-48">
@@ -97,11 +125,58 @@
 				<option value="date-asc">Oldest First</option>
 			</Select>
 		</label>
+
+		<label class="flex flex-col gap-1 text-sm font-medium text-foreground" for="blog-search">
+			{data.translations.search.title}
+			<div class="relative">
+				<SearchIcon
+					class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+					aria-hidden="true"
+				/>
+				<Input
+					id="blog-search"
+					type="search"
+					placeholder={data.translations.search.placeholder}
+					bind:value={searchInput}
+					oninput={searchHandler}
+					class="w-64 pl-9"
+				/>
+			</div>
+		</label>
+
+		<div class="flex flex-col gap-1 text-sm font-medium text-foreground">
+			{data.translations.blog.filterByTags}
+			<div class="flex flex-wrap gap-2">
+				{#each data.allTags as tag (tag.slug)}
+					<button
+						type="button"
+						class="cursor-pointer appearance-none border-0 bg-transparent p-0"
+						aria-pressed={data.currentTags.includes(tag.slug)}
+						onclick={() => filterByTag(tag.slug)}
+					>
+						<Badge
+							variant={data.currentTags.includes(tag.slug) ? 'default' : 'outline'}
+							class="transition hover:opacity-80"
+						>
+							{tag.label[data.locale]}
+						</Badge>
+					</button>
+				{/each}
+			</div>
+		</div>
 	</div>
+
+	{#if data.currentQuery && data.paginatedPosts.total > 0}
+		<p class="mb-4 text-sm text-muted-foreground">
+			{data.translations.search.results
+				.replace('{count}', String(data.paginatedPosts.total))
+				.replace('{query}', data.currentQuery)}
+		</p>
+	{/if}
 
 	{#if data.paginatedPosts.posts.length === 0}
 		<Card class="py-12 text-center text-muted-foreground">
-			{data.translations.blog.empty}
+			{data.currentQuery ? data.translations.search.noResults : data.translations.blog.empty}
 		</Card>
 	{:else}
 		<div class="space-y-6">
@@ -126,18 +201,9 @@
 						<span class="text-muted-foreground">{readingTimeLabel(post.readingTimeMinutes)}</span>
 						<div class="flex flex-wrap gap-2">
 							{#each post.tags as tag (tag)}
-								<button
-									type="button"
-									class="cursor-pointer appearance-none border-0 bg-transparent p-0"
-									onclick={() => filterByTag(tag)}
-								>
-									<Badge
-										variant={data.currentTags.includes(tag) ? 'default' : 'outline'}
-										class="transition hover:opacity-80"
-									>
-										{tag}
-									</Badge>
-								</button>
+								<Badge variant={data.currentTags.includes(tag) ? 'default' : 'outline'}>
+									{tagLabel(tag)}
+								</Badge>
 							{/each}
 						</div>
 					</div>

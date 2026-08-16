@@ -1,4 +1,5 @@
-import type { Post } from '$lib/schemas';
+import type { Locale, Post } from '$lib/schemas';
+import { matchesSearchQuery } from '$lib/utils/matchesSearchQuery';
 
 const POSTS_PER_PAGE = 10;
 
@@ -12,19 +13,26 @@ type PaginatedPosts = {
 
 type LoadPostsOptions = {
 	allPosts: Post[];
+	locale: Locale;
 	page?: number;
 	tags?: string[];
 	sort?: 'date-desc' | 'date-asc';
+	q?: string;
 };
 
 export function loadPosts(options: LoadPostsOptions): PaginatedPosts {
-	const { allPosts, page = 1, tags = [], sort = 'date-desc' } = options;
+	const { allPosts, locale, page = 1, tags = [], sort = 'date-desc', q = '' } = options;
 
 	let filtered = allPosts;
 
 	// Filter by tags if provided
 	if (tags.length > 0) {
 		filtered = filtered.filter((post) => tags.some((tag) => post.tags.includes(tag)));
+	}
+
+	// Free-text search over the localized title/excerpt
+	if (q.trim()) {
+		filtered = filtered.filter((post) => matchesSearchQuery(post, locale, q));
 	}
 
 	// Sort posts
