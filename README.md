@@ -17,13 +17,20 @@ npm run dev
 ## Run tests
 
 ```sh
-npm run test     # unit tests (Vitest) — Dialog composite + business logic
-npm run test:e2e # Playwright E2E — builds, serves the preview build, runs the suite
-npm run lint     # prettier --check + eslint
-npm run check    # svelte-check
+npm run test               # unit tests (Vitest) — Dialog composite + business logic
+npm run test:e2e           # Playwright E2E — builds, serves the preview build, runs the suite
+npm run lint                # prettier --check + eslint
+npm run check                # svelte-check
+npm run size-limit          # JS bundle size budgets
+npm run lighthouse          # Lighthouse CI — public surface (landing/blog/blog post)
+npm run lighthouse:dashboard # Lighthouse CI — authenticated dashboard
 ```
 
-`test:e2e` needs Chromium installed once via `npx playwright install chromium`.
+`test:e2e` and the Lighthouse commands need Chromium installed once via
+`npx playwright install chromium`. A Husky pre-commit hook runs `lint-staged` (fast,
+staged-files-only formatting/lint) on every commit — the full `check`/`test` suite is
+deliberately left to CI rather than run locally on every commit, since `svelte-check` is
+too slow for that.
 
 ### E2E flows (Playwright, `e2e/`)
 
@@ -43,9 +50,6 @@ npm run check    # svelte-check
 - **Visual regression** (`visual.spec.ts`): snapshots the landing page hero
   (`e2e/visual.spec.ts-snapshots/`), a static, animation-free target chosen to keep the
   baseline stable.
-
-No size-limit budgets, Lighthouse CI, or pre-commit hooks are set up yet — see
-**Known limitations** below.
 
 ## Demo credentials
 
@@ -97,6 +101,14 @@ insecure dev default.
 - **No `vercel.json`**: everything needed (ISR, edge/node runtime split) is expressible
   via adapter-vercel's inline `export const config` per route, so a separate config file
   would be redundant.
+- **Lighthouse CI's dashboard coverage is intentionally narrower** than the public
+  surface (`lighthouserc.dashboard.json` vs. `lighthouserc.json`): it asserts only one
+  authenticated URL (`/dashboard/items`, one locale), not the 3-URL public spread, and
+  turns the `seo` category assertion off entirely rather than gating on it. The
+  dashboard is `noindex` with no meta description by design (private, authenticated
+  content) — those are exactly what a `seo ≥ 0.95` gate would flag as "wrong," so
+  enforcing it there would mean regressing real SEO/security hygiene just to satisfy a
+  score. SEO stays enforced at ≥0.95 on the public surface, where it's a real signal.
 - **`/blog/[slug]` trades revalidation for speed**: it moved from SSR+ISR to
   `prerender = 'auto'` with a build-time `entries()` list, so every known post is a real
   static file (no function invocation) instead of an ISR-cached response. New posts
