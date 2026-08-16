@@ -5,11 +5,13 @@
 			"startServerReadyPattern": "Local:",
 			"url": ["http://localhost:4173/en/dashboard/items"],
 			"puppeteerScript": "./lighthouse/dashboard-login.cjs",
+			"puppeteerLaunchOptions": {
+				"args": ["--no-sandbox", "--disable-dev-shm-usage"]
+			},
 			"numberOfRuns": 3,
 			"settings": {
 				"formFactor": "mobile",
-				"throttlingMethod": "simulate",
-				"chromeFlags": "--no-sandbox --disable-dev-shm-usage"
+				"throttlingMethod": "simulate"
 			}
 		},
 		"assert": {
