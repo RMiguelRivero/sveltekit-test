@@ -216,6 +216,10 @@
 		invalidateAll();
 	}
 
+	function sortButtonLabel(columnLabel: string): string {
+		return `Sort by ${columnLabel}`;
+	}
+
 	const hasActiveFilters = $derived(
 		Boolean(
 			(data.query.filters?.status && data.query.filters.status.length > 0) ||
@@ -331,6 +335,7 @@
 							<button
 								type="button"
 								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
+								aria-label={sortButtonLabel(data.translations.dashboard.items.column.name)}
 								onclick={() => sortBy('name')}
 							>
 								{@render sortIcon('name')}
@@ -343,6 +348,7 @@
 							<button
 								type="button"
 								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
+								aria-label={sortButtonLabel(data.translations.dashboard.items.column.status)}
 								onclick={() => sortBy('status')}
 							>
 								{@render sortIcon('status')}
@@ -363,6 +369,7 @@
 							<button
 								type="button"
 								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
+								aria-label={sortButtonLabel(data.translations.dashboard.items.column.budget)}
 								onclick={() => sortBy('budget')}
 								>{@render sortIcon('budget')}
 							</button>
@@ -376,6 +383,7 @@
 							<button
 								type="button"
 								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
+								aria-label={sortButtonLabel(data.translations.dashboard.items.column.spent)}
 								onclick={() => sortBy('spent')}
 							>
 								{@render sortIcon('spent')}
@@ -388,6 +396,7 @@
 							<button
 								type="button"
 								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
+								aria-label={sortButtonLabel(data.translations.dashboard.items.column.ctr)}
 								onclick={() => sortBy('ctr')}
 							>
 								{@render sortIcon('ctr')}
@@ -400,6 +409,7 @@
 							<button
 								type="button"
 								class="inline-flex cursor-pointer items-center gap-1 font-medium uppercase"
+								aria-label={sortButtonLabel(data.translations.dashboard.items.column.updated)}
 								onclick={() => sortBy('updatedAt')}
 							>
 								{@render sortIcon('updatedAt')}
