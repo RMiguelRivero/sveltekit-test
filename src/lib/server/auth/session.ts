@@ -1,43 +1,6 @@
-import { env } from '$env/dynamic/private';
-import { dev } from '$app/environment';
-import { DEV_FALLBACK_SESSION_SECRET, SESSION_DURATION_SECONDS } from './auth.constants';
+import { SESSION_DURATION_SECONDS } from './auth.constants';
+import { base64UrlToBytes, bytesToBase64Url, getSessionSecret } from './auth.utils';
 import type { SessionPayload, SessionUser } from './types';
-
-// Web Crypto (`crypto.subtle`), not `node:crypto`: this module is reached from every
-// request via hooks.server.ts, including routes configured for Vercel's edge runtime
-// (e.g. the opengraph-image endpoint), which has no Node.js built-ins at all. Web
-// Crypto and `btoa`/`atob` are the subset of crypto APIs available in both runtimes.
-function getSessionSecret(): string {
-	if (env.SESSION_SECRET) {
-		return env.SESSION_SECRET;
-	}
-	if (!dev) {
-		throw new Error('SESSION_SECRET environment variable must be set in production');
-	}
-	console.warn(
-		'SESSION_SECRET is not set — using an insecure development fallback. Set SESSION_SECRET in production.',
-	);
-	return DEV_FALLBACK_SESSION_SECRET;
-}
-
-function bytesToBase64Url(bytes: Uint8Array): string {
-	let binary = '';
-	for (const byte of bytes) {
-		binary += String.fromCharCode(byte);
-	}
-	return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
-	const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
-	const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-	const binary = atob(padded);
-	const bytes = new Uint8Array(binary.length);
-	for (let i = 0; i < binary.length; i++) {
-		bytes[i] = binary.charCodeAt(i);
-	}
-	return bytes;
-}
 
 async function getHmacKey(): Promise<CryptoKey> {
 	return crypto.subtle.importKey(
@@ -70,18 +33,23 @@ export async function verifySessionCookieValue(value: string): Promise<{ id: str
 		return null;
 	}
 
+	// Fetched before the try block: a missing/misconfigured SESSION_SECRET is a genuine
+	// server bug, not an untrusted-cookie-decoding failure, and should crash loudly (and
+	// get logged via hooks.server.ts's handleError) rather than be swallowed as "invalid
+	// session" below.
 	const key = await getHmacKey();
-	const isValid = await crypto.subtle.verify(
-		'HMAC',
-		key,
-		base64UrlToBytes(signature),
-		new TextEncoder().encode(payloadB64),
-	);
-	if (!isValid) {
-		return null;
-	}
 
 	try {
+		const isValid = await crypto.subtle.verify(
+			'HMAC',
+			key,
+			base64UrlToBytes(signature),
+			new TextEncoder().encode(payloadB64),
+		);
+		if (!isValid) {
+			return null;
+		}
+
 		const payload = JSON.parse(
 			new TextDecoder().decode(base64UrlToBytes(payloadB64)),
 		) as SessionPayload;
@@ -94,6 +62,10 @@ export async function verifySessionCookieValue(value: string): Promise<{ id: str
 		}
 		return { id: payload.id };
 	} catch {
+		// Malformed base64url (invalid characters, or a length that produces invalid
+		// padding — never possible from a real signature, but trivial to hand-craft) makes
+		// `atob` throw synchronously. Any such decoding failure just means an invalid
+		// session, not a server error.
 		return null;
 	}
 }

@@ -93,6 +93,7 @@
 	"common.error.item.failedSave": "Aktualisierung konnte nicht gespeichert werden.",
 	"common.retry": "Erneut versuchen",
 	"common.save": "Speichern",
+	"common.sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melde dich erneut an.",
 	"common.cancel": "Abbrechen",
 	"error.notFound.title": "Seite nicht gefunden",
 	"error.notFound.description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",

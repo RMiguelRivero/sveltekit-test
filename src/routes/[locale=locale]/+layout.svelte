@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import Footer from '$lib/components/marketing/Footer.svelte';
 	import Header from '$lib/components/marketing/Header.svelte';
+	import SessionExpiryWatcher from '$lib/components/SessionExpiryWatcher.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import type { LayoutProps } from './$types';
 
@@ -38,3 +39,4 @@
 {/if}
 
 <Toast />
+<SessionExpiryWatcher user={data.user} locale={data.locale} translations={data.translations} />
