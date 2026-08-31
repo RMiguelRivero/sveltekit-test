@@ -67,6 +67,27 @@ status inline; `admin` additionally gets a pencil-icon "Edit" column opening a d
 to edit a campaign's name, status, channel, budget, spent, and CTR, validated against
 the same item schema and saved with the same optimistic-update/rollback behavior.
 
+## Session Management
+
+Sessions are `httpOnly`, HMAC-SHA256-signed cookies (Web Crypto,
+`src/lib/server/auth/session.ts`) carrying only `{id, exp}` — never the user object.
+
+- **1-hour sliding expiration**: every request with a valid session re-signs the cookie
+  with a fresh expiry (`hooks/auth.ts`), so active use keeps a session alive; an hour of
+  true inactivity lets it lapse on the next request.
+- **Focus-triggered check**: switching back to a backgrounded tab pings a read-only
+  `GET /api/session` endpoint to verify — not extend — the session; if it's expired, a
+  toast fires and the user is redirected to `/login?redirectTo=...`. This runs app-wide
+  (`SessionExpiryWatcher.svelte`, mounted in the root locale layout), not just on
+  `/dashboard`, so any authenticated page — including the public header's login/logout
+  state — stays consistent even if left open in a background tab.
+- **Server error logging**: an uncaught server error (e.g. a missing `SESSION_SECRET` in
+  production) is logged via `hooks.server.ts`'s `handleError`, the server-side
+  counterpart to the existing client-side error boundary (`hooks.client.ts`).
+- **Not yet implemented**: cross-tab sync. If a session expires while multiple tabs are
+  open, each tab only discovers it independently on its own next focus, not immediately
+  via a shared signal (e.g. `BroadcastChannel`) — planned as a follow-up.
+
 ## Deploying
 
 ```sh
@@ -88,6 +109,7 @@ insecure dev default.
 | `/blog/[slug]/opengraph-image` | SSR, dynamic (@vercel/og) | **Node**     | Originally edge (stateless/read-only/crawler-fetched), but `@vercel/og`'s edge build fetches its fallback font as a blob asset Vercel can't resolve outside Next.js's build, which fails deployment. Moved to Node, which loads the same font via `fs.readFileSync` instead — also matches Vercel deprecating Edge Functions platform-wide in favor of Fluid Compute on Node.                                                               |
 | `/login`                       | SSR                       | **Node**     | State-changing write path (sets an httpOnly session cookie); session signing itself uses Web Crypto so it _would_ run on edge, but pinned to Node for consistency with other write paths and headroom for a future real DB driver.                                                                                                                                                                                                          |
 | `/logout`                      | SSR                       | **Edge**     | Cookie delete + redirect, no data lookups or writes; the hook chain it runs through (translations/locale/auth) is already edge-safe (statically-imported mock data, Web Crypto session verification).                                                                                                                                                                                                                                       |
+| `/api/session`                 | SSR, dynamic              | **Edge**     | Read-only auth peek for the focus-triggered session check (see [Session Management](#session-management)); verifies but never extends the session, no Node built-ins needed — same edge reasoning as `/logout`.                                                                                                                                                                                                                             |
 | `/dashboard/**`                | SSR, never prerendered    | Node default | Authenticated, per-user content; guarded by a layout-server `load` (colocated with the subtree it protects, re-runs for every descendant route for free).                                                                                                                                                                                                                                                                                   |
 | `/dashboard/items`             | Streamed SSR              | **Node**     | Skeleton renders immediately; row data streams in via an unawaited `itemsPromise` from `load`. Write paths (`updateStatus`, and the admin-only `updateItem` full-detail action) want consistent single-region execution and headroom for a real DB driver later.                                                                                                                                                                            |
 | `/sitemap.xml`, `/robots.txt`  | Prerendered               | —            | Generated at build time, locale-aware.                                                                                                                                                                                                                                                                                                                                                                                                      |

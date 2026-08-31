@@ -29,6 +29,13 @@ describe('session cookie sign/verify round-trip', () => {
 		expect(result).toBeNull();
 	});
 
+	it('rejects garbage segments instead of throwing on invalid base64', async () => {
+		// "value" is 5 characters — a length no real base64url-encoded signature can ever
+		// have — which forces invalid 3-character padding and used to make `atob` throw
+		// uncaught instead of resolving to null.
+		await expect(verifySessionCookieValue('garbage.value')).resolves.toBeNull();
+	});
+
 	it('rejects an expired session', async () => {
 		const originalNow = Date.now;
 		try {

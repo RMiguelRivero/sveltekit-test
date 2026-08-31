@@ -93,6 +93,7 @@
 	"common.error.item.failedSave": "Could not save the update.",
 	"common.retry": "Try again",
 	"common.save": "Save",
+	"common.sessionExpired": "Your session has expired. Please log in again.",
 	"common.cancel": "Cancel",
 	"error.notFound.title": "Page not found",
 	"error.notFound.description": "The page you're looking for doesn't exist or has moved.",

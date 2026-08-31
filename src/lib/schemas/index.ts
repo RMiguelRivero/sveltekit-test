@@ -28,10 +28,14 @@ export {
 	webVitalRatingSchema,
 	webVitalEventSchema,
 	clientErrorEventSchema,
+	serverErrorEventSchema,
 	beaconEventSchema,
 	type WebVitalName,
 	type WebVitalRating,
 	type WebVitalEvent,
 	type ClientErrorEvent,
+	type ServerErrorEvent,
 	type BeaconEvent,
 } from './beacon';
+
+export { sessionCheckResponseSchema, type SessionCheckResponse } from './session';

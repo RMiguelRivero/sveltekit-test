@@ -1,8 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { dev } from '$app/environment';
 import { getUsers } from '$lib/server/api';
 import { createSessionCookieValue } from '$lib/server/auth/session';
-import { SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from '$lib/server/auth/auth.constants';
+import { getSessionCookieOptions } from '$lib/server/auth/auth.utils';
+import { SESSION_COOKIE_NAME } from '$lib/server/auth/auth.constants';
 import { loginPayloadSchema } from '$lib/schemas';
 import { getLoginFieldErrors } from '$lib/utils/getLoginFieldErrors';
 import type { Actions, PageServerLoad } from './$types';
@@ -49,13 +49,7 @@ export const actions: Actions = {
 
 		const { password: _password, ...sessionUser } = user;
 		const sessionCookieValue = await createSessionCookieValue(sessionUser);
-		cookies.set(SESSION_COOKIE_NAME, sessionCookieValue, {
-			httpOnly: true,
-			secure: !dev,
-			sameSite: 'lax',
-			path: '/',
-			maxAge: SESSION_DURATION_SECONDS,
-		});
+		cookies.set(SESSION_COOKIE_NAME, sessionCookieValue, getSessionCookieOptions());
 
 		throw redirect(303, resolveRedirectTarget(params.locale, url.searchParams.get('redirectTo')));
 	},

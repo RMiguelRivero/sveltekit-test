@@ -33,8 +33,19 @@ export const beaconEventSchema = z
 	.discriminatedUnion('type', [webVitalEventSchema, clientErrorEventSchema])
 	.meta({ id: 'beaconEventSchema' });
 
+export const serverErrorEventSchema = z
+	.object({
+		type: z.literal('server-error'),
+		message: z.string(),
+		status: z.number().int().optional(),
+		path: z.string().optional(),
+		stack: z.string().optional(),
+	})
+	.meta({ id: 'serverErrorEventSchema' });
+
 export type WebVitalName = z.infer<typeof webVitalNameSchema>;
 export type WebVitalRating = z.infer<typeof webVitalRatingSchema>;
 export type WebVitalEvent = z.infer<typeof webVitalEventSchema>;
 export type ClientErrorEvent = z.infer<typeof clientErrorEventSchema>;
+export type ServerErrorEvent = z.infer<typeof serverErrorEventSchema>;
 export type BeaconEvent = z.infer<typeof beaconEventSchema>;
