@@ -12,6 +12,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import AvatarChip from '$lib/components/ui/AvatarChip.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { broadcastSessionLogout } from '$lib/client/sessionBroadcast';
 	import { getInitialSidebarCollapsed, setSidebarCollapsed } from '$lib/client/sidebar';
 	import type { Translation } from '$lib/i18n/constants';
 	import type { UserRole } from '$lib/schemas';
@@ -66,6 +67,10 @@
 	function toggleCollapsed(): void {
 		collapsed = !collapsed;
 		setSidebarCollapsed(collapsed);
+	}
+
+	function handleLogoutSubmit(): void {
+		broadcastSessionLogout();
 	}
 
 	$effect(() => {
@@ -138,7 +143,11 @@
 					<p class="truncate text-xs text-sidebar-foreground/70">{capitalize(user.role)}</p>
 				</div>
 			{/if}
-			<form method="POST" action={resolve(toPathname(`/${locale}/logout`))}>
+			<form
+				method="POST"
+				action={resolve(toPathname(`/${locale}/logout`))}
+				onsubmit={handleLogoutSubmit}
+			>
 				<Button
 					type="submit"
 					variant="ghost"
@@ -220,7 +229,11 @@
 					<p class="truncate text-sm font-medium">{user.name}</p>
 					<p class="truncate text-xs text-sidebar-foreground/70">{capitalize(user.role)}</p>
 				</div>
-				<form method="POST" action={resolve(toPathname(`/${locale}/logout`))}>
+				<form
+					method="POST"
+					action={resolve(toPathname(`/${locale}/logout`))}
+					onsubmit={handleLogoutSubmit}
+				>
 					<Button
 						type="submit"
 						variant="ghost"

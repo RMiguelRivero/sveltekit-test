@@ -84,9 +84,13 @@ Sessions are `httpOnly`, HMAC-SHA256-signed cookies (Web Crypto,
 - **Server error logging**: an uncaught server error (e.g. a missing `SESSION_SECRET` in
   production) is logged via `hooks.server.ts`'s `handleError`, the server-side
   counterpart to the existing client-side error boundary (`hooks.client.ts`).
-- **Not yet implemented**: cross-tab sync. If a session expires while multiple tabs are
-  open, each tab only discovers it independently on its own next focus, not immediately
-  via a shared signal (e.g. `BroadcastChannel`) — planned as a follow-up.
+- **Cross-tab sync**: a logout — manual (the "Sign out" button) or focus-triggered
+  expiry — broadcasts to every other open tab on the same origin via `BroadcastChannel`
+  (`src/lib/client/broadcastChannel/`), so sibling tabs redirect to `/login` immediately
+  instead of each discovering the expiry independently on its own next focus. Messages
+  are a typed, compile-time-enforced discriminated union rather than a bare string, so a
+  future message type that's missing its `type` discriminant or has a malformed
+  `payload` fails the build.
 
 ## Deploying
 
