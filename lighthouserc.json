@@ -1,18 +1,18 @@
 {
 	"ci": {
 		"collect": {
-			"startServerCommand": "npm run preview",
+			"startServerCommand": "LHCI_HTTPS=1 npm run preview",
 			"startServerReadyPattern": "Local:",
 			"url": [
-				"http://localhost:4173/en",
-				"http://localhost:4173/en/blog",
-				"http://localhost:4173/en/blog/sub-second-lcp-on-a-content-site"
+				"https://localhost:4173/en",
+				"https://localhost:4173/en/blog",
+				"https://localhost:4173/en/blog/sub-second-lcp-on-a-content-site"
 			],
 			"numberOfRuns": 3,
 			"settings": {
 				"formFactor": "mobile",
 				"throttlingMethod": "simulate",
-				"chromeFlags": "--no-sandbox --disable-dev-shm-usage"
+				"chromeFlags": "--no-sandbox --disable-dev-shm-usage --ignore-certificate-errors"
 			}
 		},
 		"assert": {
