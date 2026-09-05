@@ -21,8 +21,8 @@ export default [
 	{
 		name: 'Dashboard (dashboard + dashboard/items) — initial JS',
 		path: resolveRouteJsClosure(cwd, [
-			'/[locale=locale]/dashboard',
-			'/[locale=locale]/dashboard/items',
+			'/[locale=locale]/(authenticated)/dashboard',
+			'/[locale=locale]/(authenticated)/dashboard/items',
 		]),
 		gzip: true,
 		limit: '150 KB',
