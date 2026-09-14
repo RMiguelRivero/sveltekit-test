@@ -20,12 +20,14 @@ export const prerender = false;
 // Vercel key the cache per allowed query param combination (instead of per pathname
 // only), so `/blog`, `/blog?tags=engineering`, `/blog?page=2` etc. are each generated
 // once and cached/revalidated independently every 5 minutes, rather than one variant's
-// output leaking into the others. `q` (free-text search) is deliberately left out of
-// this allowlist — its cardinality is unbounded, so caching one ISR variant per unique
-// query string would grow the cache without bound. Requests with `q` bypass the cache
-// and render fresh instead, which is cheap here since it's an in-memory array scan.
+// output leaking into the others. Any param NOT in this list isn't just excluded from
+// the cache key — Vercel strips it from the request before the function runs, so it's
+// silently dropped rather than "uncached". `q` must stay in this list for search to
+// work at all in production. This does mean one ISR variant gets cached per unique
+// search string (unbounded cardinality), but that's accepted here: each variant still
+// expires after 5 minutes, and regeneration is cheap since it's an in-memory array scan.
 export const config = {
-	isr: { expiration: 300, allowQuery: ['page', 'tags', 'sort'] },
+	isr: { expiration: 300, allowQuery: ['page', 'tags', 'sort', 'q'] },
 };
 
 export const load: PageServerLoad = async ({ url, params }) => {
